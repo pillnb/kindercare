@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+  directUrl  = env("POSTGRES_URL_NON_POOLING")
+}
+
+enum Gender {
+  male
+  female
+}
+
+enum FamilyValues {
+  konservatif
+  moderat
+  terbuka
+}
+
+enum Profession {
+  psikolog
+  dokter_spesialis
+  konselor
+}
+
+enum ConsultationStatus {
+  pending
+  in_progress
+  resolved
+}
+
+enum MaterialStatus {
+  not_started
+  in_progress
+  completed
+}
+
+enum UserRole {
+  admin
+  user
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  full_name  String
+  email      String    @unique
+  phone      String?
+  password   String
+  profession String?
+  role       UserRole  @default(user)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  children              Child[]
+  ai_personalizations   AiPersonalization[]
+  webinar_registrations WebinarRegistration[]
+  consultations         Consultation[]
+  material_progress     MaterialProgress[]
+}
+
+model Child {
+  id               Int       @id @default(autoincrement())
+  user_id          Int
+  full_name        String
+  gender           Gender
+  birth_date       DateTime
+  age              Int?
+  education_level  String?
+
+  user               User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  ai_personalizations AiPersonalization[]
+  material_progress   MaterialProgress[]
+}
+
+model AiPersonalization {
+  id                          Int           @id @default(autoincrement())
+  user_id                     Int
+  child_id                    Int
+  concern_topics              String[]
+  family_values               FamilyValues
+  religious_or_cultural_guidance Boolean
+  created_at                  DateTime      @default(now())
+
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  child  Child  @relation(fields: [child_id], references: [id], onDelete: Cascade)
+}
+
+model Material {
+  id                       Int                @id @default(autoincrement())
+  title                    String
+  description              String?
+  recommended_age_range    String?
+  estimated_duration_minutes Int?
+  created_at               DateTime           @default(now())
+
+  quizzes            Quiz[]
+  material_progress  MaterialProgress[]
+}
+
+model MaterialProgress {
+  id             Int             @id @default(autoincrement())
+  user_id        Int
+  child_id       Int
+  material_id    Int
+  status         MaterialStatus  @default(not_started)
+  completed_at   DateTime?
+  last_accessed  DateTime?
+
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  child     Child    @relation(fields: [child_id], references: [id], onDelete: Cascade)
+  material  Material @relation(fields: [material_id], references: [id], onDelete: Cascade)
+}
+
+model Quiz {
+  id             Int      @id @default(autoincrement())
+  material_id    Int
+  question       String
+  options        String[]
+  correct_answer String
+
+  material Material @relation(fields: [material_id], references: [id], onDelete: Cascade)
+}
+
+model Tip {
+  id         Int      @id @default(autoincrement())
+  title      String?
+  content    String?
+  created_at DateTime @default(now())
+}
+
+model Webinar {
+  id          Int       @id @default(autoincrement())
+  title       String
+  speaker     String?
+  date        DateTime
+  description String?
+  created_at  DateTime  @default(now())
+
+  registrations WebinarRegistration[]
+}
+
+model WebinarRegistration {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  webinar_id  Int
+  registered_at DateTime @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  webinar Webinar @relation(fields: [webinar_id], references: [id], onDelete: Cascade)
+}
+
+model Doctor {
+  id         Int         @id @default(autoincrement())
+  full_name  String
+  profession Profession
+  is_active  Boolean
+
+  consultations Consultation[]
+}
+
+model Consultation {
+  id         Int                @id @default(autoincrement())
+  user_id    Int
+  doctor_id  Int
+  message    String
+  created_at DateTime           @default(now())
+  status     ConsultationStatus @default(pending)
+
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  doctor Doctor @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+}
