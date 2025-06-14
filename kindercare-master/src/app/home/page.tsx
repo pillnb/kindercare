@@ -28,7 +28,7 @@ export default function HomePage() {
 
   return (
     <div className="flex justify-center">
-      <main className="max-w-md bg-white px-4 py-4 pb-28 font-sans space-y-6">
+      <main className="max-w-md bg-white px-4 py-4 pb-28 space-y-6">
         {/* Header */}
         <div className="rounded-b-3xl bg-gradient-to-br from-pink-400 to-pink-300 text-white px-4 py-6">
           <div className="flex justify-between items-start mb-4">

@@ -137,6 +137,8 @@ model Webinar {
   date        DateTime
   description String?
   created_at  DateTime  @default(now())
+  lokasi      String
+  job_speaker String
 
   registrations WebinarRegistration[]
 }
