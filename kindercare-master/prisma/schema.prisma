@@ -95,6 +95,8 @@ model Material {
   estimated_duration_minutes Int?
   created_at               DateTime           @default(now())
 
+  content                    String?  
+
   quizzes            Quiz[]
   material_progress  MaterialProgress[]
 }
