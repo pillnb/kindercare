@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 type Materi = {
   id: number;
@@ -45,8 +46,10 @@ export default function MateriPage() {
       <ul className="space-y-4">
         {materiList.map((materi) => (
           <li key={materi.id} className="bg-blue-50 p-3 rounded-md shadow-sm">
-            <div className="text-blue-700 font-medium">{materi.title}</div>
-            <p className="text-sm text-gray-600">{materi.description}</p>
+            <Link href={`/materi/${materi.id}`}>
+              <div className="text-blue-700 font-medium hover:underline">{materi.title}</div>
+              <p className="text-sm text-gray-600">{materi.description}</p>
+            </Link>
           </li>
         ))}
       </ul>

@@ -1,35 +1,46 @@
 import { notFound } from 'next/navigation'
 
-const materiData: Record<string, { title: string, content: string, image?: string }> = {
-  'pengenalan-bagian-tubuh': {
-    title: 'Pengenalan Bagian Tubuh',
-    content: 'Ini adalah materi tentang bagian-bagian tubuh manusia untuk anak-anak.',
-    image: '/image/materi/badan-anak.png', // contoh path, pastikan file gambarnya ada
-  },
-  'masa-pubertas': {
-    title: 'Masa Pubertas',
-    content: 'Penjelasan ringan mengenai perubahan saat masa pubertas.',
-  },
-  'privasi-dan-etika': {
-    title: 'Pentingnya Privasi dan Etika',
-    content: 'Ajarkan anak untuk menghargai privasi orang lain dan sopan santun.',
-  },
-  'hubungan-pertemanan': {
-    title: 'Hubungan Pertemanan',
-    content: 'Bagaimana cara berteman yang sehat dan saling menghormati.',
-  }
+type Materi = {
+  id: number
+  title: string
+  content?: string
 }
 
-export default function MateriDetail({ params }: { params: { id: string } }) {
-  const materi = materiData[params.id]
+// Gantilah ini dengan URL base kamu di production nanti
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
 
-  if (!materi) return notFound()
+// Fungsi untuk membuat slug dari title
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // hapus simbol aneh
+    .replace(/\s+/g, '-')     // ganti spasi dengan -
+    .replace(/--+/g, '-')     // hindari double dash
+    .trim()
+}
+
+export default async function MateriDetailPage({ params }: { params: { id: string } }) {
+  const res = await fetch(`${BASE_URL}/api/materials/${params.id}`, {
+    cache: 'no-store',
+  })
+
+  if (!res.ok) return notFound()
+
+  const materi: Materi = await res.json()
 
   return (
-    <div className="p-4">
+    <div className="p-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-pink-600">{materi.title}</h1>
-      {materi.image && <img src={materi.image} alt={materi.title} className="my-4 rounded-lg shadow-md" />}
-      <p className="text-gray-700">{materi.content}</p>
+
+      {materi.title && (
+        <img
+          src={`/image/materi/${slugify(materi.title)}.png`}
+          alt={materi.title}
+          className="my-4 w-full max-w-md mx-auto rounded-lg shadow-md"
+        />
+      )}
+
+      <p className="text-gray-700 leading-relaxed text-justify">{materi.content}</p>
     </div>
   )
 }
