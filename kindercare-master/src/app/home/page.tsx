@@ -14,17 +14,57 @@ import Image from "next/image";
 import { BottomNavbar } from "@/components/BottomNavbar";
 import { useRouter } from "next/navigation";
 
+type DailyProgress = {
+  current: number;
+  target: number;
+};
+type Tip = { id: number; title: string; content?: string }; 
+type Webinar = { id: number; title: string; date: string; speaker?: string }; 
+
 export default function HomePage() {
-  const [progress, setProgress] = useState<number>(46);
-  const [tips, setTips] = useState([]);
-  const [webinars, setWebinars] = useState([]);
+  // const [progress, setProgress] = useState<number>(46);
+  const [tips, setTips] = useState<Tip[]>([]);
+  const [webinars, setWebinars] = useState<Webinar[]>([]);
   const router = useRouter();
+  const [dailyProgress, setDailyProgress] = useState<DailyProgress | null>(null);
+  const [isLoadingProgress, setIsLoadingProgress] = useState(true);
 
   // useEffect(() => {
   //   setProgress(46)
   //   fetch("/api/tips").then(res => res.json()).then(setTips)
   //   fetch("/api/webinars").then(res => res.json()).then(setWebinars)
   // }, [])
+
+  useEffect(() => {
+    const fetchProgressData = async () => {
+      setIsLoadingProgress(true);
+      try {
+        const res = await fetch("/api/progress/summary");
+        if (!res.ok) throw new Error("Gagal mengambil data progres");
+        const data = await res.json();
+        setDailyProgress(data.dailyProgress);
+      } catch (error) {
+        console.error("Error fetching progress data for home page:", error);
+        setDailyProgress({ current: 0, target: 60 });
+      } finally {
+        setIsLoadingProgress(false);
+      }
+    };
+
+    fetchProgressData();
+    // Anda bisa menambahkan fetch untuk tips dan webinar di sini jika perlu
+  }, []);
+
+  const currentMinutes = dailyProgress?.current ?? 0;
+  const targetMinutes = dailyProgress?.target ?? 60; 
+
+  const progressValue = (currentMinutes / targetMinutes) * 100;
+  const clampedProgressValue = Math.min(progressValue, 100); 
+
+  const remainingMinutes = targetMinutes - currentMinutes;
+  const progressText = remainingMinutes <= 0 
+    ? "Target Tercapai!" 
+    : `Sisa ${remainingMinutes} min`;
 
   return (
     <div className="flex justify-center">
@@ -48,12 +88,22 @@ export default function HomePage() {
           <div className="bg-white text-black rounded-xl p-4 shadow-sm">
             <div className="flex justify-between text-sm mb-2">
               <span className="font-medium">Pembelajaran hari ini</span>
-              <span className="text-pink-500 font-medium">Progres saya</span>
+              <button onClick={() => router.push('/progress')} className="text-pink-500 font-medium">Progres saya</button>
             </div>
-            <div className="text-2xl font-bold">
-              46min <span className="text-gray-400 text-sm">/ 60min</span>
-            </div>
-            <Progress value={progress} className="h-2 mt-2" />
+            {isLoadingProgress ? (
+              <div className="py-4 text-center text-sm text-gray-500">Memuat progres...</div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">
+                  {currentMinutes}min{" "}
+                  <span className="text-gray-400 text-sm">/ {targetMinutes}min</span>
+                  <span className="text-sm ml-2" style={{ color: remainingMinutes <= 0 ? 'green' : 'orange' }}>
+                    ({progressText})
+                  </span>
+                </div>
+                <Progress value={progressValue} className="h-2 mt-2" />
+              </>
+            )}
           </div>
         </div>
 

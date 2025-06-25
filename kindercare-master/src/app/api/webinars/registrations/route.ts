@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 
-export const prisma = new PrismaClient();
+// export const prisma = new PrismaClient();
 
 // Untuk keperluan testing: hardcode userId sementara
-async function getUserIdFromReq(_req: NextRequest): Promise<number | null> {
-  return 1; // Ganti dengan user ID yang valid dari tabel users di database kamu
-}
+// async function getUserIdFromReq(_req: NextRequest): Promise<number | null> {
+//   return 1; // Ganti dengan user ID yang valid dari tabel users di database kamu
+// }
 
 export async function POST(req: NextRequest) {
-  const userId = await getUserIdFromReq(req);
-  if (!userId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const sessionCookie = req.cookies.get('session')?.value;
+  if (!sessionCookie) {
+    return NextResponse.json({ error: 'Unauthorized: Tidak ada sesi ditemukan.' }, { status: 401 });
+  }
+  const session = JSON.parse(sessionCookie);
+  const userId = session?.id;
+  if (!userId || typeof userId !== 'number') {
+    return NextResponse.json({ error: 'Unauthorized: Sesi tidak valid.' }, { status: 401 });
+  }
 
   const { webinar_id } = await req.json();
   if (typeof webinar_id !== "number") {
@@ -19,15 +26,15 @@ export async function POST(req: NextRequest) {
 
   try {
     const existing = await prisma.webinarRegistration.findFirst({
-      where: { user_id: userId, webinar_id },
+      where: { user_id: userId, webinar_id: webinar_id },
     });
 
     if (existing) {
-      return NextResponse.json({ message: "Already registered" }, { status: 409 });
+      return NextResponse.json({ message: "Already registered" }, { status: 200 });
     }
 
     await prisma.webinarRegistration.create({
-      data: { user_id: userId, webinar_id },
+      data: { user_id: userId, webinar_id: webinar_id },
     });
 
     return NextResponse.json({ message: "Registered successfully" });
@@ -38,8 +45,15 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const userId = await getUserIdFromReq(req);
-  if (!userId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const sessionCookie = req.cookies.get('session')?.value;
+  if (!sessionCookie) {
+    return NextResponse.json({ error: 'Unauthorized: Tidak ada sesi ditemukan.' }, { status: 401 });
+  }
+  const session = JSON.parse(sessionCookie);
+  const userId = session?.id;
+  if (!userId || typeof userId !== 'number') {
+    return NextResponse.json({ error: 'Unauthorized: Sesi tidak valid.' }, { status: 401 });
+  }
 
   try {
     const regs = await prisma.webinarRegistration.findMany({

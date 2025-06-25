@@ -25,7 +25,11 @@ model User {
   consultations         Consultation[]
   material_progress     MaterialProgress[]
   webinar_registrations WebinarRegistration[]
+<<<<<<< HEAD
   dailyprogress         dailyprogress[]
+=======
+  dailyprogress         DailyProgress[]
+>>>>>>> 0932f27b6c1d0089126c4e6d66ed8a09fff7be1c
 }
 
 model Child {
@@ -137,7 +141,11 @@ model Consultation {
   user       User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
+<<<<<<< HEAD
 model dailyprogress {
+=======
+model DailyProgress {
+>>>>>>> 0932f27b6c1d0089126c4e6d66ed8a09fff7be1c
   id               Int      @id @default(autoincrement())
   user_id          Int
   date             DateTime @db.Date
@@ -145,6 +153,10 @@ model dailyprogress {
   User             User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user")
 
   @@unique([user_id, date], map: "user_daily_progress_unique")
+<<<<<<< HEAD
+=======
+  @@map("dailyprogress")
+>>>>>>> 0932f27b6c1d0089126c4e6d66ed8a09fff7be1c
 }
 
 enum Gender {

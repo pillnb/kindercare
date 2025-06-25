@@ -19,11 +19,13 @@
         "name": "next"
       }
     ],
+    // --- INI STRUKTUR YANG BENAR ---
+    "baseUrl": ".",
     "paths": {
       "/prisma": ["./prisma"],
       "@/*": ["./src/*"]
-      
     }
+    // ----------------------------
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "prisma/seed.js"],
   "exclude": ["node_modules"]
