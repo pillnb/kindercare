@@ -4,14 +4,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
-  const userId = 1; // Harusnya dinamis
+  const sessionCookie = req.cookies.get('session')?.value;
+
+  if (!sessionCookie) {
+      return NextResponse.json({ error: 'Unauthorized: Tidak ada sesi ditemukan.' }, { status: 401 });
+  }
+
+  const session = JSON.parse(sessionCookie);
+  const userId = session?.id;
+
+  if (!userId || typeof userId !== 'number') {
+      return NextResponse.json({ error: 'Unauthorized: Sesi tidak valid.' }, { status: 401 });
+  }
 
   try {
     const body = await req.json();
     const { seconds } = body;
 
     if (typeof seconds !== 'number' || seconds <= 0) {
-      return NextResponse.json({ message: "Tidak ada waktu untuk dicatat." });
+      return NextResponse.json({ success: true, message: "Tidak ada waktu untuk dicatat (detik <= 0)." });
     }
 
     // Konversi detik ke menit, bulatkan ke atas jika perlu
