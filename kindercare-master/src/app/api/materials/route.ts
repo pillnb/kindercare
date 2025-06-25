@@ -50,7 +50,7 @@ export async function GET() {
             in: [
               "Tubuhku Mulai Berubah",
               "Perasaan yang Berbeda",
-              "Teman yang Baik & Aman di Internet",
+              "Teman yang baik dan aman di internet",
             ],
           },
         },
