@@ -1,5 +1,3 @@
-// Path: src/app/api/user-child-context/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 

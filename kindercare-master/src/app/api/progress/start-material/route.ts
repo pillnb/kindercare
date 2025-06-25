@@ -1,5 +1,3 @@
-// Path: src/app/api/progress/start-material/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
