@@ -1,18 +1,19 @@
-<<<<<<< HEAD
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
-import { ChevronLeft, Loader2 } from "lucide-react";
-import { BottomNavbar } from "@/components/BottomNavbar";
-=======
-"use client"; // <<< Pastikan ini ada dan tidak dikomentari
->>>>>>> 0932f27b6c1d0089126c4e6d66ed8a09fff7be1c
+// import { useEffect, useState } from "react";
+// import { useParams, useRouter } from "next/navigation";
+// import Image from "next/image";
+// import { ChevronLeft, Loader2 } from "lucide-react";
+// import { BottomNavbar } from "@/components/BottomNavbar";
+// import { useParams } from 'next/navigation';
+// import { useEffect, useRef, useState, useCallback } from 'react'; // <<< Tambahkan useCallback
+// import Image from "next/image";
 
 import { useParams } from 'next/navigation';
-import { useEffect, useRef, useState, useCallback } from 'react'; // <<< Tambahkan useCallback
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from "next/image";
+import { ChevronLeft, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Definisikan tipe data materi
 type Materi = {
@@ -20,115 +21,114 @@ type Materi = {
   title: string;
   content?: string;
 };
-<<<<<<< HEAD
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+// const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/--+/g, "-")
-    .trim();
-}
+// function slugify(text: string): string {
+//   return text
+//     .toLowerCase()
+//     .replace(/[^\w\s-]/g, "")
+//     .replace(/\s+/g, "-")
+//     .replace(/--+/g, "-")
+//     .trim();
+// }
 
-export default function MateriDetailPage() {
-  const [materi, setMateri] = useState<Materi | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
-  const params = useParams();
-  const router = useRouter();
+// export default function MateriDetailPage() {
+//   const [materi, setMateri] = useState<Materi | null>(null);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
+//   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+//   const params = useParams();
+//   const router = useRouter();
 
-  useEffect(() => {
-    const fetchMateri = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(`${BASE_URL}/api/materials/${params.id}`, {
-          cache: "no-store",
-        });
+//   useEffect(() => {
+//     const fetchMateri = async () => {
+//       setIsLoading(true);
+//       setError(null);
+//       try {
+//         const res = await fetch(`${BASE_URL}/api/materials/${params.id}`, {
+//           cache: "no-store",
+//         });
 
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        const data = await res.json();
-        setMateri(data);
-      } catch (err) {
-        console.error("Gagal mengambil materi:", err);
-        setError("Gagal memuat materi. Silakan coba lagi.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+//         if (!res.ok) throw new Error(`Status ${res.status}`);
+//         const data = await res.json();
+//         setMateri(data);
+//       } catch (err) {
+//         console.error("Gagal mengambil materi:", err);
+//         setError("Gagal memuat materi. Silakan coba lagi.");
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
 
-    fetchMateri();
-  }, [params.id]);
+//     fetchMateri();
+//   }, [params.id]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
+//   useEffect(() => {
+//     const handleScroll = () => {
+//       const scrollTop = window.scrollY;
+//       const windowHeight = window.innerHeight;
+//       const fullHeight = document.documentElement.scrollHeight;
 
-      if (
-        scrollTop + windowHeight >= fullHeight - 10 &&
-        !hasScrolledToBottom &&
-        materi
-      ) {
-        setHasScrolledToBottom(true);
+//       if (
+//         scrollTop + windowHeight >= fullHeight - 10 &&
+//         !hasScrolledToBottom &&
+//         materi
+//       ) {
+//         setHasScrolledToBottom(true);
 
-        const opened = JSON.parse(localStorage.getItem("openedMateri") || "[]");
-        if (!opened.includes(materi.id)) {
-          const updated = [...opened, materi.id];
-          localStorage.setItem("openedMateri", JSON.stringify(updated));
-        }
-      }
-    };
+//         const opened = JSON.parse(localStorage.getItem("openedMateri") || "[]");
+//         if (!opened.includes(materi.id)) {
+//           const updated = [...opened, materi.id];
+//           localStorage.setItem("openedMateri", JSON.stringify(updated));
+//         }
+//       }
+//     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasScrolledToBottom, materi]);
+//     window.addEventListener("scroll", handleScroll);
+//     return () => window.removeEventListener("scroll", handleScroll);
+//   }, [hasScrolledToBottom, materi]);
 
-  return (
-    <div className="flex justify-center min-h-screen bg-[#F8F8F8]">
-      <main className="max-w-md w-full bg-white pb-32 pt-6 px-4 relative">
-        <div className="flex items-center px-2 mb-4">
-          <button onClick={() => router.back()} className="mr-4">
-            <ChevronLeft className="w-6 h-6 text-black" />
-          </button>
-          <h1 className="text-xl font-bold text-pink-600">
-            {materi?.title}
-          </h1>
-        </div>
+//   return (
+//     <div className="flex justify-center min-h-screen bg-[#F8F8F8]">
+//       <main className="max-w-md w-full bg-white pb-32 pt-6 px-4 relative">
+//         <div className="flex items-center px-2 mb-4">
+//           <button onClick={() => router.back()} className="mr-4">
+//             <ChevronLeft className="w-6 h-6 text-black" />
+//           </button>
+//           <h1 className="text-xl font-bold text-pink-600">
+//             {materi?.title}
+//           </h1>
+//         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center items-center h-40">
-            <Loader2 className="w-6 h-6 animate-spin text-pink-500" />
-            <p className="ml-2 text-gray-600">Memuat materi...</p>
-          </div>
-        ) : error ? (
-          <p className="text-center text-red-500">{error}</p>
-        ) : materi ? (
-          <>
-            <div className="flex justify-center mb-4">
-              <Image
-                src={`/image/materi/${slugify(materi.title)}.png`}
-                alt={materi.title}
-                width={300}
-                height={200}
-                className="rounded-lg shadow-md"
-              />
-            </div>
-            <p className="text-sm text-gray-700 leading-relaxed text-justify px-1">
-              {materi.content}
-            </p>
-          </>
-        ) : null}
-      </main>
-    </div>
-  );
-}
-=======
+//         {isLoading ? (
+//           <div className="flex justify-center items-center h-40">
+//             <Loader2 className="w-6 h-6 animate-spin text-pink-500" />
+//             <p className="ml-2 text-gray-600">Memuat materi...</p>
+//           </div>
+//         ) : error ? (
+//           <p className="text-center text-red-500">{error}</p>
+//         ) : materi ? (
+//           <>
+//             <div className="flex justify-center mb-4">
+//               <Image
+//                 src={`/image/materi/${slugify(materi.title)}.png`}
+//                 alt={materi.title}
+//                 width={300}
+//                 height={200}
+//                 className="rounded-lg shadow-md"
+//               />
+//             </div>
+//             <p className="text-sm text-gray-700 leading-relaxed text-justify px-1">
+//               {materi.content}
+//             </p>
+//           </>
+//         ) : null}
+//       </main>
+//     </div>
+//   );
+// }
+
 
 // Definisikan tipe data untuk user/child context
 type UserChildContext = {
@@ -143,6 +143,7 @@ function slugify(text: string | null | undefined): string {
 
 export default function MateriDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const materialId = Array.isArray(params.id) ? params.id[0] : (params.id || null);
 
   const [materi, setMateri] = useState<Materi | null>(null);
@@ -155,7 +156,7 @@ export default function MateriDetailPage() {
   const timeSpentRef = useRef(0);
   
 
-  // --- PERBAIKAN DI SINI: Deklarasi fetchMateriAndContext di scope komponen, bungkus dengan useCallback ---
+  // Deklarasi fetchMateriAndContext di scope komponen, bungkus dengan useCallback ---
   const fetchMateriAndContext = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -213,7 +214,7 @@ export default function MateriDetailPage() {
   useEffect(() => {
     if (!userChildContext || !materialId) return; 
 
-    // >>> PERBAIKAN DI SINI: Deklarasi timer di scope yang benar <<<
+    //Deklarasi timer di scope yang benar <<<
     let timer: NodeJS.Timeout | undefined; // Deklarasikan timer di sini
     
     const sendTimeData = async () => {
@@ -285,24 +286,43 @@ export default function MateriDetailPage() {
   }, [materi, materialId, userChildContext]); 
 
   // Tampilkan loading/error jika konteks belum ada
-  if (isLoading || !userChildContext) return <div className="p-4 text-center">Memuat materi dan konteks user...</div>;
+  if (isLoading || !userChildContext) return (
+    <div className="flex justify-center items-center h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
+        <p className="ml-2 text-gray-600">Memuat materi...</p>
+    </div>
+  );
   if (error) return <div className="p-4 text-center text-red-500">Error: {error}</div>;
   if (!materi) return <div className="p-4 text-center">Materi tidak ditemukan.</div>;
 
   return (
-    <div className="p-4 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-pink-600">{materi.title}</h1>
-      <Image
-        src={`/image/materi/${slugify(materi.title)}.png`}
-        alt={materi.title || 'Gambar Materi'}
-        width={700} height={400}
-        className="my-4 w-full max-w-md mx-auto rounded-lg shadow-md object-cover"
-        onError={(e) => { e.currentTarget.src = 'https://placehold.co/700x400/fecdd3/4c0519?text=Gambar+Materi'; }}
-        priority
-      />
-      <p className="text-gray-700 leading-relaxed text-justify">{materi.content}</p>
-      <div ref={bottomRef} style={{ height: '50px' }} />
+      <div className="flex justify-center min-h-screen bg-[#F8F8F8]">
+      <main className="max-w-md w-full bg-white pb-32 pt-6 px-4 relative">
+        <div className="flex items-center px-2 mb-4">
+          <button onClick={() => router.back()} className="mr-4">
+            <ChevronLeft className="w-6 h-6 text-black" />
+          </button>
+          <h1 className="text-xl font-bold text-pink-600">
+            {materi?.title}
+          </h1>
+        </div>
+        
+          <>
+            <div className="flex justify-center mb-4">
+              <Image
+                src={`/image/materi/${slugify(materi.title)}.png`}
+                alt={materi.title || 'Gambar Materi'}
+                width={700} height={400}
+                className="my-4 w-full max-w-md mx-auto rounded-lg shadow-md object-cover"
+                onError={(e) => { e.currentTarget.src = 'https://placehold.co/700x400/fecdd3/4c0519?text=Gambar+Materi'; }}
+                priority
+              />
+            </div>
+            <p className="text-sm text-gray-700 leading-relaxed text-justify px-1">{materi.content}</p>
+          </>
+          <div ref={bottomRef} style={{ height: '50px' }} /> {/* Ini adalah elemen yang akan diobservasi */}
+      </main>
     </div>
   );
 }
->>>>>>> 0932f27b6c1d0089126c4e6d66ed8a09fff7be1c
+

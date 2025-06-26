@@ -11,10 +11,11 @@ interface Materi {
   id: number;
   title: string;
   description: string;
+  isCompleted?: boolean;
 }
 
 export default function MateriPage() {
-  const [openedMateri, setOpenedMateri] = useState<number[]>([]);
+  // const [openedMateri, setOpenedMateri] = useState<number[]>([]);
   const [materials, setMaterials] = useState<Materi[]>([]);
   const [umurAnak, setUmurAnak] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +26,7 @@ export default function MateriPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await fetch("/api/materials?userId=1");
+        const res = await fetch("/api/materials");
         if (!res.ok) throw new Error("Gagal mengambil data materi.");
         const data = await res.json();
         setMaterials(data.materi);
@@ -38,8 +39,8 @@ export default function MateriPage() {
       }
     };
 
-    const opened = JSON.parse(localStorage.getItem("openedMateri") || "[]");
-    setOpenedMateri(opened);
+    // const opened = JSON.parse(localStorage.getItem("openedMateri") || "[]");
+    // setOpenedMateri(opened);
 
     fetchMaterials();
   }, []);
@@ -99,7 +100,7 @@ export default function MateriPage() {
           ) : (
             <ul className="space-y-3">
               {materials.map((materi) => {
-                const isRead = openedMateri.includes(materi.id);
+                const isRead = materi.isCompleted;
                 return (
                   <li key={materi.id}>
                     <Link href={`/materi/${materi.id}`} className="block">

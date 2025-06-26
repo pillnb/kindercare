@@ -29,11 +29,10 @@ export async function GET(req: NextRequest) {
     if (!userId || typeof userId !== 'number') {
         return NextResponse.json({ error: 'Unauthorized: Sesi tidak valid.' }, { status: 401 });
     }
-    // --- AKHIR PENGAMBILAN userId DARI SESI ---
-
+    
     const child = await prisma.child.findFirst({
       where: { user_id: userId }, // <<< GUNAKAN userId DARI SESI DI SINI
-      select: { age: true }
+      select: { id: true, age: true }
     });
 
     if (!child || child.age === null || child.age === undefined) {
@@ -41,6 +40,7 @@ export async function GET(req: NextRequest) {
     }
 
     const umur = child.age;
+    const childId = child.id;
     const relevantAgeRanges = getRelevantAgeRanges(umur);
 
     let materi: Material[] = []; // ✅ Fix: Tambahkan tipe data eksplisit
@@ -53,37 +53,55 @@ export async function GET(req: NextRequest) {
           },
         },
       });
-<<<<<<< HEAD
-    } else if (umur >= 6 && umur <= 7) {
-      materi = await prisma.material.findMany({
-        where: {
-          title: {
-            in: [
-              "Aturan Sentuhan Aman",
-              "Siapa yang Bisa Dipercaya?",
-              "Rahasia Baik vs Rahasia Buruk",
-            ],
-          },
-        },
-      });
-    } else if (umur >= 8) {
-      materi = await prisma.material.findMany({
-        where: {
-          title: {
-            in: [
-              "Tubuhku Mulai Berubah",
-              "Perasaan yang Berbeda",
-              "Teman yang baik dan aman di internet",
-            ],
-          },
-        },
-      });
-    }
-=======
-    } 
->>>>>>> 0932f27b6c1d0089126c4e6d66ed8a09fff7be1c
 
-    return NextResponse.json({ umur, materi });
+    // } else if (umur >= 6 && umur <= 7) {
+    //   materi = await prisma.material.findMany({
+    //     where: {
+    //       title: {
+    //         in: [
+    //           "Aturan Sentuhan Aman",
+    //           "Siapa yang Bisa Dipercaya?",
+    //           "Rahasia Baik vs Rahasia Buruk",
+    //         ],
+    //       },
+    //     },
+    //   });
+    // } else if (umur >= 8) {
+    //   materi = await prisma.material.findMany({
+    //     where: {
+    //       title: {
+    //         in: [
+    //           "Tubuhku Mulai Berubah",
+    //           "Perasaan yang Berbeda",
+    //           "Teman yang baik dan aman di internet",
+    //         ],
+    //       },
+    //     },
+    //   });
+    // }
+
+    } 
+    const completedProgressRecords = await prisma.materialProgress.findMany({
+        where: {
+            user_id: userId,
+            child_id: childId,
+            status: 'completed', // Ambil hanya yang statusnya completed
+        },
+        select: {
+            material_id: true, // Hanya perlu material_id
+        },
+    });
+    // Buat Set dari material_id yang sudah selesai agar mudah dicari
+    const completedMaterialIds = new Set(completedProgressRecords.map(p => p.material_id));
+
+    // Tambahkan flag isCompleted ke setiap materi
+    const materiWithCompletion = materi.map(mat => ({
+        ...mat,
+        isCompleted: completedMaterialIds.has(mat.id),
+    }));
+
+
+    return NextResponse.json({ umur, materi: materiWithCompletion });
 
   } catch (error) {
     console.error("MATERIALS ERROR:", error);
