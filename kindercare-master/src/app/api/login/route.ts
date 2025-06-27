@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { compare } from 'bcryptjs'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/prisma'
 
 export async function POST(req: Request) {
   try {
@@ -34,6 +32,8 @@ export async function POST(req: Request) {
         id: user.id,
         name: user.full_name,
         email: user.email,
+        role: user.role,
+        personalization_completed: user.personalization_completed,
       },
     })
 
@@ -47,13 +47,13 @@ export async function POST(req: Request) {
       {
         path: '/',
         httpOnly: true,
-        maxAge: 60 * 60 * 24,
+        maxAge: 60 * 60 * 24, // 1 hari
       }
     )
 
     return res
   } catch (err) {
     console.error('LOGIN ERROR:', err)
-    return NextResponse.json({ error: 'Terjadi kesalahan' }, { status: 500 })
+    return NextResponse.json({ error: 'Terjadi kesalahan pada server' }, { status: 500 })
   }
 }

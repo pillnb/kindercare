@@ -13,7 +13,7 @@ export default function WelcomeScreen() {
         {/* Logo */}
         <div className="w-full flex justify-center mb-4">
           <Image
-            src="/image/landing/logo.png"
+            src="/image/logo.png"
             alt="Family illustration"
             width={256}
             height={256}

@@ -10,47 +10,45 @@ datasource db {
 }
 
 model User {
-  id                    Int                   @id @default(autoincrement())
-  full_name             String
-  email                 String                @unique
-  phone                 String?
-  password              String
-  profession            String?
-  created_at            DateTime              @default(now())
-  updated_at            DateTime              @updatedAt
-  role                  UserRole              @default(user)
-  daily_target_minutes  Int                   @default(60)
-  ai_personalizations   AiPersonalization[]
-  children              Child[]
-  consultations         Consultation[]
-  material_progress     MaterialProgress[]
-  webinar_registrations WebinarRegistration[]
-  dailyprogress         DailyProgress[]
+  id                      Int      @id @default(autoincrement())
+  full_name               String
+  email                   String   @unique
+  phone                   String?
+  password                String
+  profession              String?
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+  role                    UserRole @default(user)
+  daily_target_minutes    Int      @default(60)
+
+  // -- Kolom untuk Personalisasi Pengguna --
+  age_range                 String?
+  learning_preferences      String[]
+  family_value_orientation  FamilyValueOrientation?
+  wants_religious_content   Boolean?
+  personalization_completed Boolean                 @default(false)
+
+  children                Child[]
+  consultations           Consultation[]
+  material_progress       MaterialProgress[]
+  webinar_registrations   WebinarRegistration[]
+  dailyprogress           DailyProgress[]
 }
 
 model Child {
-  id                  Int                 @id @default(autoincrement())
-  user_id             Int
-  full_name           String
-  gender              Gender
-  birth_date          DateTime
-  age                 Int?
-  education_level     String?
-  ai_personalizations AiPersonalization[]
-  user                User                @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  material_progress   MaterialProgress[]
-}
+  id                Int      @id @default(autoincrement())
+  user_id           Int
+  full_name         String
+  gender            Gender
+  birth_date        DateTime
+  age               Int?
+  education_level   String?
+  
+  // -- Kolom untuk Personalisasi Anak --
+  has_special_needs Boolean? @default(false)
 
-model AiPersonalization {
-  id                             Int          @id @default(autoincrement())
-  user_id                        Int
-  child_id                       Int
-  concern_topics                 String[]
-  family_values                  FamilyValues
-  religious_or_cultural_guidance Boolean
-  created_at                     DateTime     @default(now())
-  child                          Child        @relation(fields: [child_id], references: [id], onDelete: Cascade)
-  user                           User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user              User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  material_progress MaterialProgress[]
 }
 
 model Material {
@@ -62,6 +60,10 @@ model Material {
   created_at                 DateTime           @default(now())
   image_url                  String?
   content                    String?
+  
+  // -- Kolom untuk Kategori Materi --
+  category                   String?
+
   material_progress          MaterialProgress[]
   quizzes                    Quiz[]
 }
@@ -137,7 +139,6 @@ model Consultation {
   user       User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
-
 model DailyProgress {
   id               Int      @id @default(autoincrement())
   user_id          Int
@@ -154,7 +155,7 @@ enum Gender {
   female
 }
 
-enum FamilyValues {
+enum FamilyValueOrientation {
   konservatif
   moderat
   terbuka

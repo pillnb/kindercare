@@ -60,9 +60,12 @@ export default function LoginPage() {
     }
 
     setDialogOpen(true)
+    
     setTimeout(() => {
       if (data.user?.role === "admin") {
         router.push("/admin")
+      } else if (data.user?.personalization_completed === false) {
+        router.push("/survey");
       } else {
         router.push("/home")
       }
