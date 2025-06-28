@@ -9,7 +9,7 @@ const navItems = [
   { href: "/", icon: Home, label: "Beranda" },
   { href: "/materi", icon: Book, label: "Materi" },
   { href: "/webinar", icon: GraduationCap, label: "Webinar" },
-  { href: "/tanya", icon: MessageCircle, label: "Tanya" },
+  { href: "/faq", icon: MessageCircle, label: "Tanya" },
 ];
 
 export function BottomNavbar() {
