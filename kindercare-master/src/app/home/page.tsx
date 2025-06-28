@@ -8,35 +8,41 @@ import {
   Lightbulb,
   CalendarDays,
   MessageCircle,
+  User, // User icon tetap diimpor karena digunakan di BottomNavbar
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Image from "next/image";
 import { BottomNavbar } from "@/components/BottomNavbar";
 import { useRouter } from "next/navigation";
+// import { Input } from "@/components/ui/input"; // Tidak perlu import Input karena search bar dihapus
 
 type DailyProgress = {
   current: number;
   target: number;
 };
-type Tip = { id: number; title: string; content?: string }; 
-type Webinar = { id: number; title: string; date: string; speaker?: string }; 
+type Tip = { id: number; title: string; content?: string; imageSrc?: string; };
+type Webinar = { id: number; title: string; date: string; speaker?: string; speakerImageSrc?: string; };
+
+// Helper function to slugify text for image paths
+function slugify(text: string | null | undefined): string {
+  if (!text) return '';
+  return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/--+/g, '-').trim();
+}
 
 export default function HomePage() {
-  // const [progress, setProgress] = useState<number>(46);
   const [tips, setTips] = useState<Tip[]>([]);
   const [webinars, setWebinars] = useState<Webinar[]>([]);
   const router = useRouter();
   const [dailyProgress, setDailyProgress] = useState<DailyProgress | null>(null);
+
   const [isLoadingProgress, setIsLoadingProgress] = useState(true);
+  const [isLoadingTips, setIsLoadingTips] = useState(true);
+  const [isLoadingWebinars, setIsLoadingWebinars] = useState(true);
 
-  // useEffect(() => {
-  //   setProgress(46)
-  //   fetch("/api/tips").then(res => res.json()).then(setTips)
-  //   fetch("/api/webinars").then(res => res.json()).then(setWebinars)
-  // }, [])
-
+  // Menggabungkan semua pengambilan data ke dalam satu useEffect
   useEffect(() => {
-    const fetchProgressData = async () => {
+    const fetchAllData = async () => {
+      // Ambil data Daily Progress
       setIsLoadingProgress(true);
       try {
         const res = await fetch("/api/progress/summary");
@@ -49,26 +55,65 @@ export default function HomePage() {
       } finally {
         setIsLoadingProgress(false);
       }
+
+      // Ambil data Tips
+      setIsLoadingTips(true);
+      try {
+        const res = await fetch("/api/tips");
+        if (!res.ok) throw new Error("Gagal mengambil data tips");
+        const data: Tip[] = await res.json();
+        // Menambahkan placeholder imageSrc untuk tips jika tidak ada dari API
+        const tipsWithImages = data.map(tip => ({
+          ...tip,
+          // Sesuaikan jalur gambar ini jika Anda memiliki gambar tips yang sesuai
+          imageSrc: `/image/tips/${slugify(tip.title)}.png`
+        }));
+        setTips(tipsWithImages);
+      } catch (error) {
+        console.error("Error fetching tips data for home page:", error);
+        setTips([]);
+      } finally {
+        setIsLoadingTips(false);
+      }
+
+      // Ambil data Webinars
+      setIsLoadingWebinars(true);
+      try {
+        const res = await fetch("/api/webinars");
+        if (!res.ok) throw new Error("Gagal mengambil data webinar");
+        const data: Webinar[] = await res.json();
+        // Menambahkan placeholder speakerImageSrc untuk webinar jika tidak ada dari API
+        const webinarsWithSpeakerImages = data.map((webinar, index) => ({
+          ...webinar,
+          // Sesuaikan jalur gambar speaker ini jika Anda memilikinya
+          speakerImageSrc: `/image/webinar/img-speaker-${(index % 3) + 1}.jpg`
+        }));
+        setWebinars(webinarsWithSpeakerImages);
+      } catch (error) {
+        console.error("Error fetching webinars data for home page:", error);
+        setWebinars([]);
+      } finally {
+        setIsLoadingWebinars(false);
+      }
     };
 
-    fetchProgressData();
-    // Anda bisa menambahkan fetch untuk tips dan webinar di sini jika perlu
-  }, []);
+    fetchAllData();
+  }, []); // Dependensi kosong agar useEffect hanya berjalan sekali saat komponen di-mount
 
   const currentMinutes = dailyProgress?.current ?? 0;
-  const targetMinutes = dailyProgress?.target ?? 60; 
+  const targetMinutes = dailyProgress?.target ?? 60;
 
   const progressValue = (currentMinutes / targetMinutes) * 100;
-  const clampedProgressValue = Math.min(progressValue, 100); 
+  const clampedProgressValue = Math.min(progressValue, 100);
 
   const remainingMinutes = targetMinutes - currentMinutes;
-  const progressText = remainingMinutes <= 0 
-    ? "Target Tercapai!" 
+  const progressText = remainingMinutes <= 0
+    ? "Target Tercapai!"
     : `Sisa ${remainingMinutes} min`;
 
   return (
     <div className="flex justify-center">
-      <main className="max-w-md bg-white px-4 py-4 pb-28 space-y-6">
+      <main className="max-w-md w-full bg-white px-4 py-4 pb-28 space-y-6">
         {/* Header */}
         <div className="rounded-b-3xl bg-gradient-to-br from-pink-400 to-pink-300 text-white px-4 py-6">
           <div className="flex justify-between items-start mb-4">
@@ -101,14 +146,17 @@ export default function HomePage() {
                     ({progressText})
                   </span>
                 </div>
-                <Progress value={progressValue} className="h-2 mt-2" />
+                <Progress value={clampedProgressValue} className="h-2 mt-2" />
               </>
             )}
           </div>
         </div>
 
+        {/* Bilah Pencarian (Dihapus) */}
+        {/* Kode untuk bilah pencarian ada di sini sebelumnya */}
+
         {/* Navigasi fitur */}
-        <div className="grid grid-cols-4 gap-3 text-center mt-4 text-xs">
+        <div className="grid grid-cols-4 gap-3 text-center text-xs mt-4 px-4">
           <div
             onClick={() => router.push("/materi")}
             className="flex flex-col items-center gap-1"
@@ -137,7 +185,7 @@ export default function HomePage() {
             <span>Webinar</span>
           </div>
           <div
-            onClick={() => router.push("/tanya")}
+            onClick={() => router.push("/faq")}
             className="flex flex-col items-center gap-1"
           >
             <div className="bg-white rounded-xl shadow-md p-3">
@@ -148,7 +196,7 @@ export default function HomePage() {
         </div>
 
         {/* CTA lanjutkan */}
-        <div className="relative rounded-2xl bg-gradient-to-r from-pink-400 to-pink-300 px-4 py-4 text-white">
+        <div className="relative rounded-2xl bg-gradient-to-r from-pink-400 to-pink-300 px-4 py-4 text-white mx-4">
           <p className="text-sm font-medium z-10 relative">
             Lanjutkan Progres Belajar
           </p>
@@ -160,54 +208,96 @@ export default function HomePage() {
             width={75}
             height={75}
             className="absolute right-2 bottom-0 z-0"
+            style={{ objectFit: 'contain' }}
           />
         </div>
 
         {/* Tips Komunikasi */}
-        <section className="space-y-2">
+        <section className="space-y-2 px-4">
           <h3 className="text-base font-semibold">Tips Komunikasi</h3>
-          <div className="grid grid-cols-2 gap-4">
-            {tips.map((tip: unknown) => (
-              <div
-                key={tip.id}
-                className="rounded-lg overflow-hidden shadow-sm"
-              >
-                <div className="p-2 text-sm font-medium">{tip.title}</div>
-              </div>
-            ))}
-          </div>
+          {isLoadingTips ? (
+            <div className="py-4 text-center text-sm text-gray-500">Memuat tips...</div>
+          ) : tips.length > 0 ? (
+            <div className="flex space-x-4 overflow-x-auto pb-4 hide-scrollbar">
+              {tips.map((tip: Tip) => (
+                <div
+                  key={tip.id}
+                  className="flex-none w-[180px] bg-white rounded-lg shadow-md overflow-hidden"
+                >
+                   <div className="relative w-full h-[100px] overflow-hidden rounded-t-lg">
+                      <Image
+                        src={tip.imageSrc || '/image/tips/default-tip.png'}
+                        alt={tip.title}
+                        layout="fill"
+                        objectFit="cover"
+                        onError={(e) => { e.currentTarget.src = '/image/tips/default-tip.png'; }}
+                      />
+                   </div>
+                  <div className="p-2 text-sm font-medium text-gray-800 line-clamp-2">
+                    {tip.title}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 text-sm">Tidak ada tips yang tersedia.</p>
+          )}
         </section>
 
         {/* Webinar */}
-        <section className="space-y-2">
+        <section className="space-y-2 px-4">
           <h3 className="text-base font-semibold">Webinar Terdekat</h3>
-          <div className="grid grid-cols-2 gap-4">
-            {webinars.map((webinar: unknown) => (
-              <div
-                key={webinar.id}
-                className="bg-white rounded-lg shadow-md p-4"
-              >
-                <p className="text-sm font-semibold">{webinar.title}</p>
-                <p className="text-xs text-gray-500">
-                  {new Date(webinar.date).toLocaleDateString("id-ID", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                  <br />
-                  {new Date(webinar.date).toLocaleTimeString("id-ID", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-            ))}
-          </div>
+          {isLoadingWebinars ? (
+            <div className="py-4 text-center text-sm text-gray-500">Memuat webinar...</div>
+          ) : webinars.length > 0 ? (
+            <div className="flex space-x-4 overflow-x-auto pb-4 hide-scrollbar">
+              {webinars.map((webinar: Webinar) => (
+                <div
+                  key={webinar.id}
+                  className="flex-none w-[150px] bg-white rounded-lg shadow-md p-3 text-center"
+                >
+                  <div className="relative w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden">
+                    <Image
+                      src={webinar.speakerImageSrc || "/image/webinar/img-speaker-1.jpg"}
+                      alt={webinar.speaker || 'Speaker'}
+                      layout="fill"
+                      objectFit="cover"
+                      onError={(e) => { e.currentTarget.src = '/image/webinar/img-speaker-1.jpg'; }}
+                    />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800 line-clamp-2">{webinar.title}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {new Date(webinar.date).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                    <br />
+                    {new Date(webinar.date).toLocaleTimeString("id-ID", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 text-sm">Tidak ada webinar terdekat.</p>
+          )}
         </section>
 
         <BottomNavbar />
       </main>
+      {/* Custom CSS for hide-scrollbar */}
+      <style jsx global>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+      `}</style>
     </div>
   );
 }
