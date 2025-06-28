@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -17,6 +18,10 @@ export default function RegisterPage() {
     profession: "",
     password: "",
     confirmPassword: "",
+    // Perubahan: Gunakan child_age (umur) bukan child_birth_date (tanggal lahir)
+    child_name: "",
+    child_gender: "",
+    child_age: "", // Ubah ke string untuk input, akan dikonversi ke number saat submit
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -30,15 +35,40 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { full_name, email, phone, password, confirmPassword, profession } =
-      formData;
+    const {
+      full_name,
+      email,
+      phone,
+      password,
+      confirmPassword,
+      profession,
+      child_name,
+      child_gender,
+      child_age, // Ambil umur anak
+    } = formData;
 
-    if (!full_name || !email || !phone || !password || !confirmPassword) {
+    if (
+      !full_name ||
+      !email ||
+      !phone ||
+      !password ||
+      !confirmPassword ||
+      !child_name ||
+      !child_gender ||
+      !child_age // Validasi umur anak
+    ) {
       setError("Semua field wajib diisi");
       return;
     }
     if (password !== confirmPassword) {
       setError("Konfirmasi password tidak cocok");
+      return;
+    }
+
+    // Validasi tambahan untuk umur anak
+    const ageNum = parseInt(child_age);
+    if (isNaN(ageNum) || ageNum < 0 || ageNum > 20) { // Batasan umur, sesuaikan jika perlu
+      setError("Umur anak tidak valid. Masukkan angka antara 0-20.");
       return;
     }
 
@@ -54,6 +84,9 @@ export default function RegisterPage() {
           phone,
           password,
           profession,
+          child_name,
+          child_gender,
+          child_age: ageNum, // Kirim umur sebagai angka ke backend
         }),
       });
 
@@ -101,14 +134,15 @@ export default function RegisterPage() {
               htmlFor="full_name"
               className="text-pink-500 font-semibold text-sm"
             >
-              Nama Lengkap
+              Nama Lengkap Anda
             </Label>
             <Input
               id="full_name"
               type="text"
               value={formData.full_name}
               onChange={(e) => updateField("full_name", e.target.value)}
-              placeholder="Masukkan Nama Lengkap"
+              placeholder="Masukkan Nama Lengkap Anda"
+              required
             />
           </div>
 
@@ -125,6 +159,7 @@ export default function RegisterPage() {
               value={formData.email}
               onChange={(e) => updateField("email", e.target.value)}
               placeholder="Masukkan Email"
+              required
             />
           </div>
 
@@ -141,6 +176,7 @@ export default function RegisterPage() {
               value={formData.phone}
               onChange={(e) => updateField("phone", e.target.value)}
               placeholder="Masukkan Nomor HP"
+              required
             />
           </div>
 
@@ -160,6 +196,74 @@ export default function RegisterPage() {
             />
           </div>
 
+          {/* Form untuk Data Anak */}
+          <h2 className="text-left text-lg font-bold text-black mt-8 mb-4">
+            Data Anak
+          </h2>
+
+          <div className="space-y-1">
+            <Label
+              htmlFor="child_name"
+              className="text-pink-500 font-semibold text-sm"
+            >
+              Nama Lengkap Anak
+            </Label>
+            <Input
+              id="child_name"
+              type="text"
+              value={formData.child_name}
+              onChange={(e) => updateField("child_name", e.target.value)}
+              placeholder="Masukkan Nama Lengkap Anak"
+              required
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label
+              htmlFor="child_gender"
+              className="text-pink-500 font-semibold text-sm"
+            >
+              Jenis Kelamin Anak
+            </Label>
+            <RadioGroup
+              name="child_gender"
+              value={formData.child_gender}
+              onValueChange={(value) => updateField("child_gender", value)}
+              className="mt-2 space-y-1"
+              required
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="male" id="child_gender_male" />
+                <Label htmlFor="child_gender_male">Laki-laki</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="female" id="child_gender_female" />
+                <Label htmlFor="child_gender_female">Perempuan</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* Perubahan: Input Umur Anak */}
+          <div className="space-y-1">
+            <Label
+              htmlFor="child_age"
+              className="text-pink-500 font-semibold text-sm"
+            >
+              Umur Anak (Tahun)
+            </Label>
+            <Input
+              id="child_age"
+              type="number" // Menggunakan type="number"
+              value={formData.child_age}
+              onChange={(e) => updateField("child_age", e.target.value)}
+              placeholder="Masukkan umur anak (misal: 3)"
+              min="0" // Batasan umur minimal
+              max="20" // Batasan umur maksimal, sesuaikan jika perlu
+              required
+            />
+          </div>
+
+          {/* Bagian Password */}
           <div className="space-y-1 relative">
             <Label
               htmlFor="password"
@@ -174,6 +278,7 @@ export default function RegisterPage() {
               onChange={(e) => updateField("password", e.target.value)}
               placeholder="••••••"
               className="pr-10"
+              required
             />
             <button
               type="button"
@@ -202,6 +307,7 @@ export default function RegisterPage() {
               onChange={(e) => updateField("confirmPassword", e.target.value)}
               placeholder="••••••"
               className="pr-10"
+              required
             />
             <button
               type="button"
