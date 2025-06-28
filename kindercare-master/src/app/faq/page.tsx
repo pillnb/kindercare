@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { BottomNavbar } from "@/components/BottomNavbar";
 
-// --- PERUBAHAN DI SINI: Menambahkan pemisah baris (\n) pada data ---
 const faqData = [
   // Kategori: Informasi Umum
   {
@@ -67,8 +66,6 @@ const faqData = [
     category: 'Keamanan Digital'
   }
 ];
-// --- AKHIR PERUBAHAN DATA ---
-
 
 const categories = ["Informasi umum", "Komunikasi", "Keamanan Digital"];
 
@@ -106,14 +103,15 @@ export default function FaqPage() {
           <div className="px-4 py-6 space-y-6">
             <h2 className="text-lg font-semibold text-gray-800">Sering Ditanyakan</h2>
 
-            <div className="flex justify-between gap-2">
+            {/* ===== PERBAIKAN DI SINI ===== */}
+            <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
               {categories.map((category) => (
                 <Button
                   key={category}
                   onClick={() => handleCategoryClick(category)}
                   variant="default"
                   className={cn(
-                    "flex-1 rounded-full text-sm px-3 py-1 h-auto font-normal shadow-none transition-all",
+                    "rounded-full text-sm px-4 py-1.5 h-auto font-normal shadow-none whitespace-nowrap",
                     activeCategory === category
                       ? "bg-pink-500 text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -123,6 +121,7 @@ export default function FaqPage() {
                 </Button>
               ))}
             </div>
+            {/* ===== AKHIR PERUBAHAN ===== */}
 
             <div className="space-y-3 pt-2">
               {filteredFaqs.map((faq) => (
@@ -141,7 +140,6 @@ export default function FaqPage() {
                   </button>
                   {openFaqId === faq.id && (
                     <div className="px-2 pt-2 pb-1">
-                      {/* --- PERUBAHAN DI SINI: Menggunakan `whitespace-pre-line` --- */}
                       <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{faq.answer}</p>
                     </div>
                   )}
@@ -152,6 +150,17 @@ export default function FaqPage() {
         </main>
         
         <BottomNavbar />
+
+        {/* CSS untuk menyembunyikan scrollbar */}
+        <style jsx global>{`
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .hide-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+          }
+        `}</style>
       </div>
     </div>
   );
