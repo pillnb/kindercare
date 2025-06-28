@@ -1,80 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react"; // Tambahkan useEffect
+import { ChevronLeft, ChevronDown, Loader2 } from "lucide-react"; // Tambahkan Loader2
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { BottomNavbar } from "@/components/BottomNavbar";
 
-const faqData = [
-  // Kategori: Informasi Umum
-  {
-    id: 1,
-    question: 'Hal apa saja yang perlu disampaikan saat memberikan pendidikan seksual pada anak?',
-    answer: `Poin-poin penting yang perlu disampaikan adalah:
-1. Pengenalan nama-nama bagian tubuh dengan benar.
-2. Konsep "sentuhan baik" dan "sentuhan buruk".
-3. Batasan tubuh pribadi (area yang tidak boleh disentuh orang lain).
-4. Siapa saja orang dewasa yang bisa dipercaya untuk melapor jika ada sentuhan tidak nyaman.`,
-    category: 'Informasi umum'
-  },
-  {
-    id: 2,
-    question: 'Di umur keberapa anak harus diajarkan pendidikan seks?',
-    answer: 'Pendidikan ini bisa dimulai sedini mungkin, bahkan sejak usia 2-3 tahun, dengan bahasa yang disesuaikan tingkat pemahaman anak. Semakin dini, semakin baik untuk membangun fondasi kesadaran tubuh.',
-    category: 'Informasi umum'
-  },
-  {
-    id: 3,
-    question: 'Apakah normal jika anak kecil menyentuh area pribadinya?',
-    answer: 'Ya, ini adalah bagian normal dari eksplorasi tubuh anak. Selama dilakukan di tempat pribadi dan tidak berlebihan, ini adalah perilaku wajar. Orang tua bisa mengajarkan tentang batasan dan privasi dengan cara yang positif.',
-    category: 'Informasi umum'
-  },
-  
-  // Kategori: Komunikasi
-  {
-    id: 4,
-    question: 'Bagaimana cara memulai percakapan tentang pubertas dengan anak?',
-    answer: 'Mulailah secara santai dan bertahap. Gunakan buku atau video sebagai pemicu percakapan. Normalisasikan perubahan yang akan terjadi dan pastikan anak tahu bahwa mereka bisa bertanya apa saja kepada Anda.',
-    category: 'Komunikasi'
-  },
-  {
-    id: 5,
-    question: 'Bagaimana cara mengajarkan pendidikan seks sejak dini kepada anak? Supaya tidak terjadi kekerasan seksual pada anak?',
-    answer: 'Gunakan buku cerita bergambar, lagu, atau permainan peran. Hindari menakut-nakuti. Fokus pada pemberdayaan anak untuk berani berkata "tidak" pada sentuhan yang membuat mereka tidak nyaman dan segera memberitahu orang tua.',
-    category: 'Komunikasi'
-  },
-  {
-    id: 6,
-    question: 'Pendidikan seks kepada anak itu penting, tapi orangtua sering kesulitan. Bagaimana mengajarakan pendidikan seksual kepada anak dengan cara yang kreatif?',
-    answer: 'Anda bisa menggunakan media seperti video animasi edukatif yang ramah anak, membuat poster bersama tentang bagian tubuh, atau menggunakan boneka untuk mensimulasikan situasi sosial yang aman dan tidak aman.',
-    category: 'Komunikasi'
-  },
-
-  // Kategori: Keamanan Digital
-  {
-    id: 7,
-    question: 'Bagaimana cara melindungi anak dari konten negatif di internet?',
-    answer: 'Gunakan fitur "safe search" pada browser, aktifkan mode terbatas di YouTube, dan gunakan aplikasi kontrol orang tua. Yang terpenting adalah membangun komunikasi terbuka agar anak berani melapor jika menemukan sesuatu yang tidak nyaman.',
-    category: 'Keamanan Digital'
-  },
-  {
-    id: 8,
-    question: 'Apa itu "grooming" online dan bagaimana cara mencegahnya?',
-    answer: 'Grooming adalah ketika orang dewasa membangun hubungan emosional dengan anak secara online untuk tujuan eksploitasi. Ajarkan anak untuk tidak pernah membagikan informasi pribadi, tidak menerima permintaan pertemanan dari orang asing, dan tidak pernah setuju untuk bertemu dengan orang yang hanya dikenal secara online.',
-    category: 'Keamanan Digital'
-  }
-];
+// Definisikan tipe data untuk FAQ
+interface FaqItem {
+  id: number;
+  question: string;
+  answer: string;
+  category: string;
+}
 
 const categories = ["Informasi umum", "Komunikasi", "Keamanan Digital"];
 
 export default function FaqPage() {
   const router = useRouter();
+  
+  // State untuk data, loading, dan error
+  const [allFaqs, setAllFaqs] = useState<FaqItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [activeCategory, setActiveCategory] = useState("Informasi umum");
   const [openFaqId, setOpenFaqId] = useState<number | null>(null);
 
-  const filteredFaqs = faqData.filter(
+  // useEffect untuk mengambil data dari API saat komponen pertama kali dimuat
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const response = await fetch('/api/faq');
+        if (!response.ok) {
+          throw new Error('Gagal mengambil data dari server.');
+        }
+        const data = await response.json();
+        setAllFaqs(data);
+      } catch (err) {
+        setError('Tidak dapat memuat FaQ. Periksa koneksi internet Anda.');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFaqs();
+  }, []); // Array kosong berarti efek ini hanya berjalan sekali
+
+  const filteredFaqs = allFaqs.filter(
     (faq) => faq.category === activeCategory
   );
 
@@ -86,6 +61,52 @@ export default function FaqPage() {
     setActiveCategory(category);
     setOpenFaqId(null); 
   }
+
+  // Fungsi untuk menampilkan konten berdasarkan state
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center h-40">
+          <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
+          <p className="ml-2 text-gray-600">Memuat FAQ...</p>
+        </div>
+      );
+    }
+
+    if (error) {
+      return <p className="text-center text-red-500 mt-8">{error}</p>;
+    }
+
+    if (allFaqs.length === 0) {
+      return <p className="text-center text-gray-500 mt-8">FAQ belum tersedia saat ini. Silakan coba lagi nanti.</p>;
+    }
+
+    return (
+      <div className="space-y-3 pt-2">
+        {filteredFaqs.map((faq) => (
+          <div key={faq.id} className="border-b border-gray-200 pb-2">
+            <button
+              onClick={() => handleToggleFaq(faq.id)}
+              className="w-full flex justify-between items-center text-left cursor-pointer hover:bg-gray-50 p-2 rounded-md"
+            >
+              <p className="text-gray-800 font-medium text-sm pr-4">{faq.question}</p>
+              <ChevronDown
+                className={cn(
+                  "w-5 h-5 text-gray-500 transition-transform duration-300 flex-shrink-0",
+                  openFaqId === faq.id && "rotate-180"
+                )}
+              />
+            </button>
+            {openFaqId === faq.id && (
+              <div className="px-2 pt-2 pb-1">
+                <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{faq.answer}</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="flex justify-center bg-gray-50">
@@ -103,7 +124,6 @@ export default function FaqPage() {
           <div className="px-4 py-6 space-y-6">
             <h2 className="text-lg font-semibold text-gray-800">Sering Ditanyakan</h2>
 
-            {/* ===== PERBAIKAN DI SINI ===== */}
             <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
               {categories.map((category) => (
                 <Button
@@ -121,44 +141,21 @@ export default function FaqPage() {
                 </Button>
               ))}
             </div>
-            {/* ===== AKHIR PERUBAHAN ===== */}
+            
+            {renderContent()}
 
-            <div className="space-y-3 pt-2">
-              {filteredFaqs.map((faq) => (
-                <div key={faq.id} className="border-b border-gray-200 pb-2">
-                  <button
-                    onClick={() => handleToggleFaq(faq.id)}
-                    className="w-full flex justify-between items-center text-left cursor-pointer hover:bg-gray-50 p-2 rounded-md"
-                  >
-                    <p className="text-gray-800 font-medium text-sm pr-4">{faq.question}</p>
-                    <ChevronDown
-                      className={cn(
-                        "w-5 h-5 text-gray-500 transition-transform duration-300 flex-shrink-0",
-                        openFaqId === faq.id && "rotate-180"
-                      )}
-                    />
-                  </button>
-                  {openFaqId === faq.id && (
-                    <div className="px-2 pt-2 pb-1">
-                      <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{faq.answer}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
           </div>
         </main>
         
         <BottomNavbar />
 
-        {/* CSS untuk menyembunyikan scrollbar */}
         <style jsx global>{`
           .hide-scrollbar::-webkit-scrollbar {
             display: none;
           }
           .hide-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
           }
         `}</style>
       </div>
