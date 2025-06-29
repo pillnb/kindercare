@@ -10,43 +10,37 @@ datasource db {
 }
 
 model User {
-  id                      Int      @id @default(autoincrement())
-  full_name               String
-  email                   String   @unique
-  phone                   String?
-  password                String
-  profession              String?
-  created_at              DateTime @default(now())
-  updated_at              DateTime @updatedAt
-  role                    UserRole @default(user)
-  daily_target_minutes    Int      @default(60)
-
-  // -- Kolom untuk Personalisasi Pengguna --
+  id                        Int                     @id @default(autoincrement())
+  full_name                 String
+  email                     String                  @unique
+  phone                     String?
+  password                  String
+  profession                String?
+  created_at                DateTime                @default(now())
+  updated_at                DateTime                @updatedAt
+  role                      UserRole                @default(user)
+  daily_target_minutes      Int                     @default(60)
   age_range                 String?
   learning_preferences      String[]
   family_value_orientation  FamilyValueOrientation?
   wants_religious_content   Boolean?
   personalization_completed Boolean                 @default(false)
-
-  children                Child[]
-  consultations           Consultation[]
-  material_progress       MaterialProgress[]
-  webinar_registrations   WebinarRegistration[]
-  dailyprogress           DailyProgress[]
+  children                  Child[]
+  consultations             Consultation[]
+  material_progress         MaterialProgress[]
+  webinar_registrations     WebinarRegistration[]
+  dailyprogress             DailyProgress[]
 }
 
 model Child {
-  id                Int      @id @default(autoincrement())
+  id                Int                @id @default(autoincrement())
   user_id           Int
   full_name         String
   gender            Gender
   birth_date        DateTime
   age               Int?
   education_level   String?
-  
-  // -- Kolom untuk Personalisasi Anak --
-  has_special_needs Boolean? @default(false)
-
+  has_special_needs Boolean?           @default(false)
   user              User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
   material_progress MaterialProgress[]
 }
@@ -60,10 +54,7 @@ model Material {
   created_at                 DateTime           @default(now())
   image_url                  String?
   content                    String?
-  
-  // -- Kolom untuk Kategori Materi --
   category                   String?
-
   material_progress          MaterialProgress[]
   quizzes                    Quiz[]
 }
@@ -96,6 +87,8 @@ model Tip {
   id         Int      @id @default(autoincrement())
   title      String?
   content    String?
+  category   String?   
+  image_url  String?   
   created_at DateTime @default(now())
 }
 
@@ -153,7 +146,7 @@ model DailyProgress {
 model Faq {
   id        Int      @id @default(autoincrement())
   question  String
-  answer    String   @db.Text // Menggunakan @db.Text untuk jawaban yang lebih panjang
+  answer    String
   category  String
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -193,4 +186,3 @@ enum UserRole {
   admin
   user
 }
-

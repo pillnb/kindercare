@@ -194,3 +194,7 @@ ALTER TABLE "Consultation" ADD CONSTRAINT "Consultation_user_id_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "dailyprogress" ADD CONSTRAINT "fk_user" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AlterTable
+ALTER TABLE "Tip" ADD COLUMN     "category" TEXT,
+ADD COLUMN     "image_url" TEXT;
