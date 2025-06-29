@@ -1,8 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { compare } from 'bcryptjs'
 import prisma from '@/lib/prisma'
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const url = new URL(req.url)
+  const BASE_URL = url.origin
+
   try {
     const { email, password } = await req.json()
 
@@ -50,6 +53,16 @@ export async function POST(req: Request) {
         maxAge: 60 * 60 * 24, // 1 hari
       }
     )
+
+    const payload = { 
+      userId: user.id,
+      seconds: 0
+    };
+    const updateStreakRes = await fetch(`${BASE_URL}/api/progress/update-time`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+    if (!updateStreakRes.ok) throw new Error("Gagal memuat Update streak. Mohon login ulang.")
 
     return res
   } catch (err) {
