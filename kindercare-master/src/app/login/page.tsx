@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog" // DialogFooter tidak kita gunakan lagi
 
 export default function LoginPage() {
   const router = useRouter()
@@ -22,7 +22,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [dialogOpen, setDialogOpen] = useState(false)
+  
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  const [showPersonalizationDialog, setShowPersonalizationDialog] = useState(false)
 
   const updateField = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -59,13 +61,15 @@ export default function LoginPage() {
       return
     }
 
-    setDialogOpen(true)
+    setShowSuccessDialog(true)
     
     setTimeout(() => {
+      setShowSuccessDialog(false)
+
       if (data.user?.role === "admin") {
         router.push("/admin")
       } else if (data.user?.personalization_completed === false) {
-        router.push("/survey");
+        setShowPersonalizationDialog(true)
       } else {
         router.push("/home")
       }
@@ -74,8 +78,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start px-6 py-12 bg-white">
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+      {/* Dialog 1: Sukses Login */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Login Berhasil!</DialogTitle>
             <DialogDescription>
@@ -84,14 +89,39 @@ export default function LoginPage() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+      
+      <Dialog open={showPersonalizationDialog} onOpenChange={setShowPersonalizationDialog}>
+        <DialogContent className="w-[calc(100%-3rem)] max-w-xs p-8 text-center rounded-2xl">
+          <DialogHeader className="space-y-2 mb-6">
+            <DialogTitle className="text-lg font-bold">
+              Anda berhasil membuat akun
+            </DialogTitle>
+            <DialogDescription className="text-sm text-gray-500 leading-relaxed">
+              Ikuti tes personalisasi untuk mendapatkan konten sesuai kebutuhan.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col items-center gap-3">
+            <Button 
+              onClick={() => router.push('/survey')}
+              className="w-full h-11 rounded-full bg-pink-500 text-white font-semibold shadow-md hover:bg-pink-600"
+            >
+              Tes Personalisasi
+            </Button>
+            <Button 
+              onClick={() => router.push('/home')}
+              variant="outline" // Ganti dari 'ghost' ke 'outline'
+              className="w-full h-11 rounded-full border-pink-500 text-pink-500 hover:bg-pink-50 hover:text-pink-600 font-semibold"
+            >
+              Lewati untuk Sekarang
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Card className="w-full max-w-sm p-0 border-0 shadow-none">
         <div className="flex items-center mb-6">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="text-gray-600 hover:text-gray-800"
-          >
+          <button type="button" onClick={() => router.back()} className="text-gray-600 hover:text-gray-800">
             <ArrowLeft className="w-5 h-5" />
           </button>
         </div>
@@ -101,50 +131,23 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           {error && <p className="text-sm text-red-500">{error}</p>}
-
           <div className="space-y-1">
             <Label htmlFor="email" className="text-pink-500 font-semibold text-sm">Email</Label>
-            <Input
-              id="email"
-              type="text"
-              autoComplete="email"
-              value={formData.email}
-              onChange={(e) => updateField("email", e.target.value)}
-              placeholder="Masukkan Alamat Email"
-            />
+            <Input id="email" type="text" autoComplete="email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} placeholder="Masukkan Alamat Email"/>
           </div>
-
           <div className="space-y-1 relative">
             <Label htmlFor="password" className="text-pink-500 font-semibold text-sm">Password</Label>
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={(e) => updateField("password", e.target.value)}
-              placeholder="••••••"
-              className="pr-10"
-            />
-            <button
-              type="button"
-              className="absolute top-8 right-0 text-gray-500"
-              onClick={() => setShowPassword(!showPassword)}
-            >
+            <Input id="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={(e) => updateField("password", e.target.value)} placeholder="••••••" className="pr-10"/>
+            <button type="button" className="absolute top-8 right-0 text-gray-500" onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-
           <div className="text-right text-sm text-pink-500 font-medium">
             <Link href="/lupa-password">Forgot password?</Link>
           </div>
-
-          <Button
-            type="submit"
-            disabled={!formData.email || !formData.password || isLoading}
-            className="w-full h-12 rounded-full bg-gradient-to-r from-[#F857A6] to-[#FF5858] text-white font-semibold shadow-md hover:opacity-90 disabled:opacity-50"
-          >
+          <Button type="submit" disabled={isLoading} className="w-full h-12 rounded-full bg-gradient-to-r from-[#F857A6] to-[#FF5858] text-white font-semibold shadow-md hover:opacity-90 disabled:opacity-50">
             {isLoading ? <Loader2 className="animate-spin h-4 w-4" /> : "Masuk"}
           </Button>
-
           <p className="text-center text-sm text-gray-600">
             Belum punya akun? {" "}
             <Link href="/signup" className="text-pink-500 font-semibold hover:underline">
