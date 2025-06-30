@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { FaBell, FaUser, FaQuestionCircle, FaCog, FaSignOutAlt, FaChevronRight } from 'react-icons/fa';
+import { FaBell, FaUser, FaCog, FaSignOutAlt, FaChevronRight } from 'react-icons/fa';
 import { BottomNavbar } from "@/components/BottomNavbar";
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -133,7 +133,7 @@ export default function ProfilePage() {
                         <span className="block text-sm text-gray-900">{user.full_name}</span>
                     </div>
                     <div className="py-3 border-t border-pink-500">
-                        <span className="block font-bold text-xs text-gray-600 mb-1">Personalisasi</span>
+                        <span className="block font-bold text-xs text-gray-600 mb-1">Hasil Personalisasi</span>
                         <span className="block text-sm text-gray-900">{user.personalization}</span>
                     </div>
                     <div className="py-3 border-t border-pink-500">
@@ -155,12 +155,18 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            {/* Menu Pengaturan */}
             <div className="bg-white rounded-3xl shadow-md border border-gray-200">
                 <div className="flex items-center p-5 border-b border-pink-500 cursor-pointer hover:bg-gray-50 transition-colors"
                      onClick={() => router.push('/account-settings')}>
                     <FaUser size={20} className="text-gray-600 mr-4" />
                     <span className="flex-grow text-xs text-gray-900 font-medium">Pengaturan Akun</span>
+                    <FaChevronRight size={16} className="text-gray-400" />
+                </div>
+                <div 
+                  className="flex items-center p-5 border-b border-pink-500 cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={() => router.push('/survey')} >
+                    <FaCog size={20} className="text-gray-600 mr-4" />
+                    <span className="flex-grow text-xs text-gray-900 font-medium">Tes Personalisasi AI</span>
                     <FaChevronRight size={16} className="text-gray-400" />
                 </div>
                 <div className="flex items-center p-5 cursor-pointer hover:bg-gray-50 transition-colors text-red-600"
