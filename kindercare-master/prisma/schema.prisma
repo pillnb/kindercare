@@ -25,6 +25,7 @@ model User {
   family_value_orientation  FamilyValueOrientation?
   wants_religious_content   Boolean?
   personalization_completed Boolean                 @default(false)
+  personalization_result    String?                 // Judul materi hasil personalisasi AI
   children                  Child[]
   consultations             Consultation[]
   material_progress         MaterialProgress[]

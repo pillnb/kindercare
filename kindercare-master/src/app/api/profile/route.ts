@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
         phone: true,
         profession: true,
         learning_preferences: true,
+        personalization_result: true, // Ambil judul materi hasil personalisasi
         children: {
           select: {
             full_name: true,
@@ -67,7 +68,7 @@ export async function GET(req: NextRequest) {
         email: user.email,
         phone: user.phone,
         profession: user.profession,
-        personalization: user.learning_preferences?.[0] || 'Belum diatur',
+        personalization: user.personalization_result || 'Belum ada hasil personalisasi',
       },
       child: childResponse,
     });

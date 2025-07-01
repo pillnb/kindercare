@@ -63,16 +63,17 @@ export default function TipsPage() {
         </div>
         
         <div className="px-4 py-6 space-y-6">
-            <div className="flex gap-3 overflow-x-auto pb-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {categories.map((category) => (
                 <Button
                   key={category}
                   onClick={() => handleCategoryClick(category)}
                   variant="default"
+                  disabled={isLoading}
                   className={cn(
-                    "rounded-full text-sm px-4 py-1.5 h-auto font-normal shadow-none whitespace-nowrap",
+                    "rounded-full text-xs px-3 py-2 h-auto font-medium shadow-none whitespace-nowrap flex-shrink-0 transition-all duration-200",
                     activeCategory === category
-                      ? "bg-pink-500 text-white"
+                      ? "bg-pink-500 text-white shadow-md"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   )}
                 >
@@ -87,28 +88,52 @@ export default function TipsPage() {
               </div>
             ) : error ? (
               <p className="text-center text-red-500">{error}</p>
+            ) : filteredTips.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-2">Tidak ada tips untuk kategori ini</p>
+                <p className="text-gray-400 text-sm">Coba pilih kategori lain</p>
+              </div>
             ) : (
               <ul className="space-y-4">
                 {filteredTips.map((tip) => (
                   <li key={tip.id}>
                     <Link href={`/tips/${tip.id}`} className="block group">
                       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-transform duration-200 group-hover:scale-[1.02] group-hover:shadow-md">
-                        <div className="relative w-full h-40">
+                        <div 
+                          className="relative w-full aspect-[16/9] bg-gray-100 overflow-hidden bg-cover bg-center"
+                          style={{
+                            backgroundImage: `url(${tip.image_url || "/image/tips/default-tip.png"})`
+                          }}
+                        >
+                          {/* Overlay untuk memastikan gambar dimuat dengan baik */}
                           <Image
                             src={tip.image_url || "/image/tips/default-tip.png"}
                             alt={tip.title || "Gambar Tip"}
-                            layout="fill"
-                            objectFit="cover"
+                            fill
+                            className="object-cover transition-opacity duration-300"
+                            unoptimized={true}
+                            onLoad={(e) => {
+                              // Sembunyikan background image ketika Next.js image berhasil dimuat
+                              const target = e.target as HTMLImageElement;
+                              const parent = target.parentElement;
+                              if (parent) parent.style.backgroundImage = "none";
+                            }}
                           />
                         </div>
                         <div className="p-4">
-                          <p className="font-semibold text-gray-800 text-base mb-2">
+                          <h3 className="font-semibold text-gray-800 text-sm leading-5 mb-3 line-clamp-2 min-h-[40px]">
                             {tip.title}
-                          </p>
-                          <div className="flex items-center gap-4 text-gray-500">
-                              <span className="flex items-center gap-1.5 text-xs"><Heart className="w-4 h-4" /> 785</span>
-                              <span className="flex items-center gap-1.5 text-xs"><Send className="w-4 h-4" /> 1k+</span>
-                              <Bookmark className="w-4 h-4 ml-auto" />
+                          </h3>
+                          <div className="flex items-center justify-between text-gray-500">
+                            <div className="flex items-center gap-4">
+                              <span className="flex items-center gap-1.5 text-xs">
+                                <Heart className="w-4 h-4" /> 785
+                              </span>
+                              <span className="flex items-center gap-1.5 text-xs">
+                                <Send className="w-4 h-4" /> 1k+
+                              </span>
+                            </div>
+                            <Bookmark className="w-4 h-4" />
                           </div>
                         </div>
                       </div>

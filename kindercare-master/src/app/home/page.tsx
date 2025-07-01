@@ -62,11 +62,10 @@ export default function HomePage() {
         const res = await fetch("/api/tips");
         if (!res.ok) throw new Error("Gagal mengambil data tips");
         const data: Tip[] = await res.json();
-        // Menambahkan placeholder imageSrc untuk tips jika tidak ada dari API
+        // Menggunakan image_url langsung dari database, bukan slug
         const tipsWithImages = data.map(tip => ({
           ...tip,
-          // Sesuaikan jalur gambar ini jika Anda memiliki gambar tips yang sesuai
-          imageSrc: `/image/tips/${slugify(tip.title)}.png`
+          imageSrc: (tip as any).image_url || "/image/tips/default-tip.png" // Gunakan image_url dari database
         }));
         setTips(tipsWithImages);
       } catch (error) {
@@ -197,7 +196,7 @@ export default function HomePage() {
 
         {/* CTA lanjutkan */}
         <div className="relative rounded-2xl bg-gradient-to-r from-pink-400 to-pink-300 px-4 py-4 text-white mx-4">
-          <p className="text-sm font-medium z-10 relative">
+          <p className="text-sm font-medium z-10 relative pr-20">
             Lanjutkan Progres Belajar
           </p>
 
@@ -205,68 +204,90 @@ export default function HomePage() {
           <Image
             src="/image/home/character.png"
             alt="Lanjutkan"
-            width={75}
-            height={75}
+            width={65}
+            height={65}
             className="absolute right-2 bottom-0 z-0"
             style={{ objectFit: 'contain' }}
           />
         </div>
 
         {/* Tips Komunikasi */}
-        <section className="space-y-2 px-4">
-          <h3 className="text-base font-semibold">Tips Komunikasi</h3>
+        <section className="space-y-3">
+          <h3 className="text-base font-semibold px-4">Tips Komunikasi</h3>
           {isLoadingTips ? (
             <div className="py-4 text-center text-sm text-gray-500">Memuat tips...</div>
           ) : tips.length > 0 ? (
-            <div className="flex space-x-4 overflow-x-auto pb-4 hide-scrollbar">
+            <div className="flex space-x-3 overflow-x-auto pb-4 px-4 scrollbar-hide">
               {tips.map((tip: Tip) => (
                 <div
                   key={tip.id}
-                  className="flex-none w-[180px] bg-white rounded-lg shadow-md overflow-hidden"
+                  onClick={() => router.push(`/tips/${tip.id}`)}
+                  className="flex-none w-[170px] bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow border border-gray-100"
                 >
-                   <div className="relative w-full h-[100px] overflow-hidden rounded-t-lg">
+                   <div 
+                     className="relative w-full h-[90px] overflow-hidden bg-gray-100 bg-cover bg-center"
+                     style={{
+                       backgroundImage: `url(${tip.imageSrc || "/image/tips/default-tip.png"})`
+                     }}
+                   >
                       <Image
                         src={tip.imageSrc || '/image/tips/default-tip.png'}
                         alt={tip.title}
-                        layout="fill"
-                        objectFit="cover"
-                        onError={(e) => { e.currentTarget.src = '/image/tips/default-tip.png'; }}
+                        fill
+                        className="object-cover transition-opacity duration-300"
+                        unoptimized={true}
+                        onLoad={(e) => {
+                          // Hide background image when Next.js image loads
+                          const target = e.target as HTMLImageElement;
+                          const parent = target.parentElement;
+                          if (parent) parent.style.backgroundImage = "none";
+                        }}
+                        onError={(e) => {
+                          console.log('Home tips image failed to load:', tip.imageSrc);
+                        }}
                       />
                    </div>
-                  <div className="p-2 text-sm font-medium text-gray-800 line-clamp-2">
-                    {tip.title}
+                  <div className="p-3 h-[65px] flex items-start">
+                    <h4 className="text-sm font-medium text-gray-800 leading-[1.3] line-clamp-2 w-full break-words">
+                      {tip.title}
+                    </h4>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500 text-sm">Tidak ada tips yang tersedia.</p>
+            <p className="text-center text-gray-500 text-sm px-4">Tidak ada tips yang tersedia.</p>
           )}
         </section>
 
         {/* Webinar */}
-        <section className="space-y-2 px-4">
-          <h3 className="text-base font-semibold">Webinar Terdekat</h3>
+        <section className="space-y-3">
+          <h3 className="text-base font-semibold px-4">Webinar Terdekat</h3>
           {isLoadingWebinars ? (
             <div className="py-4 text-center text-sm text-gray-500">Memuat webinar...</div>
           ) : webinars.length > 0 ? (
-            <div className="flex space-x-4 overflow-x-auto pb-4 hide-scrollbar">
+            <div className="flex space-x-3 overflow-x-auto pb-4 px-4 scrollbar-hide">
               {webinars.map((webinar: Webinar) => (
                 <div
                   key={webinar.id}
-                  className="flex-none w-[150px] bg-white rounded-lg shadow-md p-3 text-center"
+                  className="flex-none w-[140px] bg-white rounded-xl shadow-sm p-3 text-center border border-gray-100"
                 >
-                  <div className="relative w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden">
+                  <div className="relative w-12 h-12 mx-auto mb-2 rounded-full overflow-hidden">
                     <Image
                       src={webinar.speakerImageSrc || "/image/webinar/img-speaker-1.jpg"}
                       alt={webinar.speaker || 'Speaker'}
-                      layout="fill"
-                      objectFit="cover"
-                      onError={(e) => { e.currentTarget.src = '/image/webinar/img-speaker-1.jpg'; }}
+                      fill
+                      className="object-cover"
+                      onError={(e) => { 
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/image/webinar/img-speaker-1.jpg'; 
+                      }}
                     />
                   </div>
-                  <p className="text-sm font-semibold text-gray-800 line-clamp-2">{webinar.title}</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <h4 className="text-xs font-semibold text-gray-800 line-clamp-2 min-h-[30px] mb-1">
+                    {webinar.title}
+                  </h4>
+                  <p className="text-xs text-gray-500">
                     {new Date(webinar.date).toLocaleDateString("id-ID", {
                       day: "numeric",
                       month: "short",
@@ -282,22 +303,12 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500 text-sm">Tidak ada webinar terdekat.</p>
+            <p className="text-center text-gray-500 text-sm px-4">Tidak ada webinar terdekat.</p>
           )}
         </section>
 
         <BottomNavbar />
       </main>
-      {/* Custom CSS for hide-scrollbar */}
-      <style jsx global>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
-        }
-      `}</style>
     </div>
   );
 }

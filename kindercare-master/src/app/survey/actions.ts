@@ -116,9 +116,20 @@ export async function savePersonalization(formData: FormData) {
     } else {
         await prisma.child.create({ data: { user_id: userId, full_name: "Anak Pengguna", birth_date: new Date(), gender: rawFormData.childGender, age: ageValue, has_special_needs: rawFormData.childSpecialNeeds } });
     }
-    await prisma.user.update({ where: { id: userId }, data: { age_range: rawFormData.parentAge, learning_preferences: rawFormData.learningTopics, family_value_orientation: rawFormData.familyView, wants_religious_content: rawFormData.religiousContent, personalization_completed: true } });
     
     const recommendedTitle = await getRecommendation(formData);
+    
+    await prisma.user.update({ 
+        where: { id: userId }, 
+        data: { 
+            age_range: rawFormData.parentAge, 
+            learning_preferences: rawFormData.learningTopics, 
+            family_value_orientation: rawFormData.familyView, 
+            wants_religious_content: rawFormData.religiousContent, 
+            personalization_completed: true,
+            personalization_result: recommendedTitle // Simpan judul materi hasil personalisasi
+        } 
+    });
     
     redirect(`/survey/result?recommendation=${encodeURIComponent(recommendedTitle)}`);
 }
