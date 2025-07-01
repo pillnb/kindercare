@@ -10,7 +10,7 @@ const navItems = [
   { href: "/home", icon: Home, label: "Beranda" }, // Ubah link root ke /home untuk konsistensi
   { href: "/materi", icon: Book, label: "Materi" },
   { href: "/webinar", icon: GraduationCap, label: "Webinar" },
-  { href: "/faq", icon: MessageCircle, label: "Tanya" },
+  { href: "/faq", icon: MessageCircle, label: "FAQ" },
   { href: "/profile", icon: User, label: "Profil" }, // Item baru
 ];
 

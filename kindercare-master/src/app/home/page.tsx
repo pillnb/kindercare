@@ -169,7 +169,7 @@ export default function HomePage() {
             <div className="bg-white rounded-xl shadow-md p-3">
               <MessageCircle className="text-green-500 w-5 h-5" />
             </div>
-            <span>Tanya</span>
+            <span>FAQ</span>
           </div>
         </div>
 
