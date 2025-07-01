@@ -1,5 +1,3 @@
-// src/app/account-settings/page.tsx
-
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from 'react';
@@ -18,50 +16,31 @@ type UserData = {
   profession: string;
   personalization: string;
 };
-
 type ChildData = {
   full_name: string;
   gender: 'male' | 'female';
-  age: number;
+  age: number | string;
   education_level: string;
 } | null;
-
 type ProfileData = {
   user: UserData;
   child: ChildData;
 };
-
 const EditRow = ({ label, name, value, onChange, type = 'text' }: { label: string, name: string, value: string, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string }) => (
     <div className='py-2'>
         <label htmlFor={name} className="block font-bold text-xs text-gray-600 mb-1">{label}</label>
-        <input
-            type={type}
-            id={name}
-            name={name}
-            value={value}
-            onChange={onChange}
-            className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-pink-500 focus:border-pink-500"
-        />
+        <input type={type} id={name} name={name} value={value} onChange={onChange} className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-pink-500 focus:border-pink-500" placeholder={type === 'number' ? '0' : ''}/>
     </div>
 );
-
 const InfoRowWithSeparator = ({ label, value }: { label: string; value: string; }) => (
   <>
-    <div className="py-3">
-        <span className="block font-bold text-xs text-gray-600 mb-1">{label}</span>
-        <span className="block text-sm text-gray-900">{value}</span>
-    </div>
+    <div className="py-3"><span className="block font-bold text-xs text-gray-600 mb-1">{label}</span><span className="block text-sm text-gray-900">{value}</span></div>
     <div className="h-[1px] bg-pink-500"></div>
   </>
 );
-
 const LastInfoRow = ({ label, value }: { label: string; value: string; }) => (
-    <div className="py-3">
-        <span className="block font-bold text-xs text-gray-600 mb-1">{label}</span>
-        <span className="block text-sm text-gray-900">{value}</span>
-    </div>
+    <div className="py-3"><span className="block font-bold text-xs text-gray-600 mb-1">{label}</span><span className="block text-sm text-gray-900">{value}</span></div>
 );
-
 
 export default function PengaturanAkunPage() {
   const router = useRouter();
@@ -71,6 +50,13 @@ export default function PengaturanAkunPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: '',
+  });
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -92,81 +78,91 @@ export default function PengaturanAkunPage() {
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>, category: 'user' | 'child') => {
     const { name, value } = e.target;
-    setFormData((prev) => {
-      if (!prev) return null;
+    if (formData) {
+        setFormData((prev) => prev ? {
+            ...prev,
+            [category]: { ...prev[category], [name]: value },
+        } : null);
+    }
+  };
 
-      // Handle user data update
-      if (category === 'user') {
-        const updatedUser = {
-          ...prev.user,
-          [name]: value,
-        };
-        return { ...prev, user: updatedUser };
-      }
-
-      // Handle child data update
-      if (category === 'child' && prev.child) {
-        let updatedChild = { ...prev.child };
-
-        if (name === 'age') {
-          // Ubah string kosong menjadi null, atau parse ke integer
-          const ageValue = value === '' ? null : parseInt(value, 10);
-          // Jika hasil parse bukan angka (NaN), jangan update, atau set ke null
-          updatedChild.age = isNaN(ageValue as number) ? prev.child.age : (ageValue as number);
-        } else {
-          // Untuk properti lain seperti full_name
-          updatedChild = { ...updatedChild, [name]: value };
-        }
-        return { ...prev, child: updatedChild };
-      }
-
-      return prev; // Kembalikan state sebelumnya jika tidak ada perubahan
-    });
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleRadioChange = (value: string) => {
     if (formData) {
         setFormData((prev) => {
             if (!prev) return null;
-            // Pastikan child tidak null sebelum menyebar propertinya
             const childData = prev.child ? { ...prev.child, gender: value as 'male' | 'female' } : null;
-            return {
-                ...prev,
-                child: childData,
-            };
+            return { ...prev, child: childData };
         });
     }
   };
   
   const handleSave = async () => {
     if (!formData || !profileData) return;
-
     if (JSON.stringify(formData) === JSON.stringify(profileData)) {
       toast.info("Tidak ada perubahan untuk disimpan.");
       setIsEditing(false);
       return;
     }
-
     setIsSaving(true);
-    setError(null);
     try {
-        const res = await fetch('/api/profile', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
-        });
+        const res = await fetch('/api/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
         const result = await res.json();
         if (!res.ok) throw new Error(result.error || 'Gagal menyimpan data.');
         
-        setProfileData(formData);
+        const updatedData = { ...formData };
+        if (updatedData.child) { updatedData.child.age = Number(updatedData.child.age); }
+
+        setProfileData(updatedData);
         setIsEditing(false);
         toast.success("Data berhasil diperbarui!");
     } catch (err) {
-        const errorMessage = (err as Error).message;
-        setError(errorMessage);
-        toast.error(errorMessage);
+        toast.error((err as Error).message);
     } finally {
         setIsSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    // Validasi di frontend
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      toast.error("Password baru dan konfirmasi tidak cocok.");
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      toast.error("Password baru minimal harus 6 karakter.");
+      return;
+    }
+
+    setIsSavingPassword(true);
+    try {
+        const res = await fetch('/api/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(passwordData),
+        });
+
+        const result = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(result.error || "Gagal mengubah password karena kesalahan server.");
+        }
+
+        toast.success("Password berhasil diubah! Anda akan diarahkan untuk login kembali.");
+        
+        setTimeout(async () => {
+            await fetch('/api/logout');
+            router.push('/login');
+        }, 2000);
+
+    } catch (err) {
+        toast.error((err as Error).message);
+    } finally {
+        setIsSavingPassword(false);
     }
   };
 
@@ -175,21 +171,9 @@ export default function PengaturanAkunPage() {
     setIsEditing(false);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
-      </div>
-    );
-  }
-
-  if (error && !profileData) {
-    return <div className="p-4 text-center text-red-500">Error: {error}</div>;
-  }
-  
-  if (!profileData || !formData) {
-    return <div className="p-4 text-center text-gray-500">Data tidak ditemukan.</div>;
-  }
+  if (isLoading) return <div className="flex justify-center items-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-pink-500" /></div>;
+  if (error && !profileData) return <div className="p-4 text-center text-red-500">{error}</div>;
+  if (!profileData || !formData) return <div className="p-4 text-center text-gray-500">Data tidak ditemukan.</div>;
   
   const { user, child } = isEditing ? formData : profileData;
 
@@ -198,9 +182,7 @@ export default function PengaturanAkunPage() {
       <main className="max-w-md w-full bg-white relative pb-28">
         <div className="relative bg-pink-400 bg-gradient-to-br from-pink-400 to-pink-300 text-white pt-6 pb-16 rounded-b-3xl shadow-md">
           <div className="flex items-center px-4 mb-4">
-            <button onClick={() => router.back()} className="mr-4">
-              <ChevronLeft className="w-6 h-6" />
-            </button>
+            <button onClick={() => router.back()} className="mr-4"><ChevronLeft className="w-6 h-6" /></button>
             <h1 className="text-xl font-semibold">Pengaturan Akun</h1>
           </div>
           <div className="absolute left-1/2 -translate-x-1/2 bottom-[-45px] flex flex-col items-center">
@@ -214,18 +196,13 @@ export default function PengaturanAkunPage() {
           <div className="flex justify-end gap-2">
             {isEditing ? (
               <>
-                <button onClick={handleCancel} className="px-4 py-2 text-sm bg-gray-200 text-gray-800 rounded-full flex items-center gap-2">
-                    <FaTimes /> Batal
-                </button>
+                <button onClick={handleCancel} className="px-4 py-2 text-sm bg-gray-200 text-gray-800 rounded-full flex items-center gap-2"><FaTimes /> Batal</button>
                 <button onClick={handleSave} disabled={isSaving} className="px-4 py-2 text-sm bg-green-500 text-white rounded-full flex items-center gap-2">
-                    {isSaving ? <Loader2 className='animate-spin' /> : <FaSave />}
-                    Simpan
+                  {isSaving ? <Loader2 className='animate-spin' /> : <FaSave />} Simpan
                 </button>
               </>
             ) : (
-              <button onClick={() => setIsEditing(true)} className="px-4 py-2 text-sm bg-pink-500 text-white rounded-full">
-                Edit Data
-              </button>
+              <button onClick={() => setIsEditing(true)} className="px-4 py-2 text-sm bg-pink-500 text-white rounded-full">Edit Data</button>
             )}
           </div>
 
@@ -264,29 +241,38 @@ export default function PengaturanAkunPage() {
                     <div className='py-2'>
                         <label className="block font-bold text-xs text-gray-600 mb-1">Jenis Kelamin</label>
                         <RadioGroup value={formData.child?.gender} onValueChange={handleRadioChange} className="flex gap-4 pt-1">
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="male" id="male" />
-                                <Label htmlFor="male">Laki-laki</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="female" id="female" />
-                                <Label htmlFor="female">Perempuan</Label>
-                            </div>
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="male" id="male" /><Label htmlFor="male">Laki-laki</Label></div>
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="female" id="female" /><Label htmlFor="female">Perempuan</Label></div>
                         </RadioGroup>
                     </div>
                     <div className="h-[1px] bg-pink-500 my-1"></div>
-                    <EditRow label="Umur Anak (Tahun)" name="age" value={formData.child?.age?.toString() ?? ''} onChange={(e) => handleInputChange(e, 'child')} type="number" />
+                    <EditRow label="Umur Anak (Tahun)" name="age" value={String(formData.child?.age ?? '')} onChange={(e) => handleInputChange(e, 'child')} type="number" />
                   </>
                 ) : (
                   <>
                     <InfoRowWithSeparator label="Nama Lengkap" value={child.full_name} />
                     <InfoRowWithSeparator label="Jenis Kelamin" value={child.gender === 'female' ? 'Perempuan' : 'Laki-laki'} />
-                    <InfoRowWithSeparator label="Umur" value={`${child.age} Tahun`} />
+                    <LastInfoRow label="Umur" value={`${child.age} Tahun`} />
                   </>
                 )}
               </div>
             </div>
           )}
+          
+          <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-200">
+            <h2 className="text-base font-bold mb-2">Ubah Password</h2>
+            <div className="flex flex-col">
+              <EditRow label="Password Saat Ini" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} type="password" />
+              <div className="h-[1px] bg-pink-500 my-1"></div>
+              <EditRow label="Password Baru" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} type="password" />
+              <div className="h-[1px] bg-pink-500 my-1"></div>
+              <EditRow label="Konfirmasi Password Baru" name="confirmNewPassword" value={passwordData.confirmNewPassword} onChange={handlePasswordChange} type="password" />
+            </div>
+            <button onClick={handleChangePassword} disabled={isSavingPassword} className="mt-4 w-full px-4 py-2 text-sm bg-pink-500 text-white rounded-full flex items-center justify-center gap-2">
+              {isSavingPassword ? <Loader2 className='animate-spin' /> : <FaSave />}
+              Ubah Password
+            </button>
+          </div>
         </div>
       </main>
       <BottomNavbar />
