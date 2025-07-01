@@ -176,7 +176,8 @@ export default function ProgressPage() {
 
       {/* --- MODAL GANTI TARGET HARIAN --- */}
       {showTargetModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+        // PERUBAHAN: Menambahkan backdrop-blur-sm dan mengubah opasitas
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex justify-center items-center p-4 z-50">
           <div className="bg-white rounded-xl p-6 shadow-lg max-w-sm w-full">
             <h2 className="text-xl font-bold mb-4 text-center">Ganti Target Harian</h2>
             <div className="flex flex-col gap-3 mb-6">
