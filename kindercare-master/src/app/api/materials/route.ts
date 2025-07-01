@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { NextResponse, NextRequest } from "next/server";
 import type { Material } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 const getRelevantAgeRanges = (age: number | null): string[] => {
   if (age === null || age === undefined) {

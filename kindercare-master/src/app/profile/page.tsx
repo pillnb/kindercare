@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { FaBell, FaUser, FaCog, FaSignOutAlt, FaChevronRight } from 'react-icons/fa';
+import { FaUser, FaCog, FaSignOutAlt, FaChevronRight } from 'react-icons/fa';
 import { BottomNavbar } from "@/components/BottomNavbar";
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
