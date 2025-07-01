@@ -119,9 +119,6 @@ export default function ProfilePage() {
                         <p className="text-sm opacity-90">{user.phone}</p>
                     </div>
                 </div>
-                <div className="cursor-pointer">
-                    <FaBell size={24} color="#FFF" />
-                </div>
             </div>
 
             {/* Kartu Data Summary */}
