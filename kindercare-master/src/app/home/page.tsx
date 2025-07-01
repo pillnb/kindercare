@@ -2,19 +2,15 @@
 
 import { useEffect, useState } from "react";
 import {
-  Bell,
-  MessageSquareText,
   Book,
   Lightbulb,
   CalendarDays,
   MessageCircle,
-  // User, // User icon dihapus karena tidak digunakan langsung di file ini
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Image from "next/image";
 import { BottomNavbar } from "@/components/BottomNavbar";
 import { useRouter } from "next/navigation";
-// import { Input } from "@/components/ui/input"; // Tidak perlu import Input karena search bar dihapus
 
 type DailyProgress = {
   current: number;
@@ -22,12 +18,6 @@ type DailyProgress = {
 };
 type Tip = { id: number; title: string; content?: string; imageSrc?: string; };
 type Webinar = { id: number; title: string; date: string; speaker?: string; speakerImageSrc?: string; };
-
-// Helper function to slugify text for image paths
-// function slugify(text: string | null | undefined): string {
-//   if (!text) return '';
-//   return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/--+/g, '-').trim();
-// }
 
 export default function HomePage() {
   const [tips, setTips] = useState<Tip[]>([]);
@@ -39,7 +29,6 @@ export default function HomePage() {
   const [isLoadingTips, setIsLoadingTips] = useState(true);
   const [isLoadingWebinars, setIsLoadingWebinars] = useState(true);
 
-  // Menggabungkan semua pengambilan data ke dalam satu useEffect
   useEffect(() => {
     const fetchAllData = async () => {
       // Ambil data Daily Progress
@@ -62,10 +51,9 @@ export default function HomePage() {
         const res = await fetch("/api/tips");
         if (!res.ok) throw new Error("Gagal mengambil data tips");
         const data: Tip[] = await res.json();
-        // Menggunakan image_url langsung dari database, bukan slug
         const tipsWithImages = data.map(tip => ({
           ...tip,
-          imageSrc: (tip as Tip & { image_url?: string }).image_url || "/image/tips/default-tip.png" // Gunakan image_url dari database
+          imageSrc: (tip as Tip & { image_url?: string }).image_url || "/image/tips/default-tip.png"
         }));
         setTips(tipsWithImages);
       } catch (error) {
@@ -81,10 +69,8 @@ export default function HomePage() {
         const res = await fetch("/api/webinars");
         if (!res.ok) throw new Error("Gagal mengambil data webinar");
         const data: Webinar[] = await res.json();
-        // Menambahkan placeholder speakerImageSrc untuk webinar jika tidak ada dari API
         const webinarsWithSpeakerImages = data.map((webinar, index) => ({
           ...webinar,
-          // Sesuaikan jalur gambar speaker ini jika Anda memilikinya
           speakerImageSrc: `/image/webinar/img-speaker-${(index % 3) + 1}.jpg`
         }));
         setWebinars(webinarsWithSpeakerImages);
@@ -97,7 +83,7 @@ export default function HomePage() {
     };
 
     fetchAllData();
-  }, []); // Dependensi kosong agar useEffect hanya berjalan sekali saat komponen di-mount
+  }, []);
 
   const currentMinutes = dailyProgress?.current ?? 0;
   const targetMinutes = dailyProgress?.target ?? 60;
@@ -121,10 +107,6 @@ export default function HomePage() {
               <p className="text-sm leading-snug mt-1">
                 Apa kabar hari ini? Semoga senang gembira dengan si kecil ya.
               </p>
-            </div>
-            <div className="flex gap-4">
-              <MessageSquareText className="w-5 h-5" />
-              <Bell className="w-5 h-5" />
             </div>
           </div>
 
@@ -150,9 +132,6 @@ export default function HomePage() {
             )}
           </div>
         </div>
-
-        {/* Bilah Pencarian (Dihapus) */}
-        {/* Kode untuk bilah pencarian ada di sini sebelumnya */}
 
         {/* Navigasi fitur */}
         <div className="grid grid-cols-4 gap-3 text-center text-xs mt-4 px-4">
@@ -194,16 +173,14 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* CTA lanjutkan */}
-        <div className="relative rounded-2xl bg-gradient-to-r from-pink-400 to-pink-300 px-4 py-4 text-white mx-4">
-          <p className="text-sm font-medium z-10 relative pr-20">
-            Sudah siap menambah ilmu baru hari ini? Yuk, jelajahi KinderCare!
+        {/* CTA Section */}
+        <div className="relative rounded-2xl bg-gradient-to-r from-pink-400 to-pink-300 px-5 py-4 text-white mx-4 flex items-center">
+          <p className="text-sm font-medium z-10 relative pr-20 leading-snug">
+            Sudah siap menambah ilmu baru hari ini? Yuk, jelajahi KinderCare!
           </p>
-
-          {/* Gambar sebagai elemen absolut */}
           <Image
             src="/image/home/character.png"
-            alt="Lanjutkan"
+            alt="Ilustrasi"
             width={65}
             height={65}
             className="absolute right-2 bottom-0 z-0"
@@ -237,7 +214,6 @@ export default function HomePage() {
                         className="object-cover transition-opacity duration-300"
                         unoptimized={true}
                         onLoad={(e) => {
-                          // Hide background image when Next.js image loads
                           const target = e.target as HTMLImageElement;
                           const parent = target.parentElement;
                           if (parent) parent.style.backgroundImage = "none";
@@ -268,9 +244,11 @@ export default function HomePage() {
           ) : webinars.length > 0 ? (
             <div className="flex space-x-3 overflow-x-auto pb-4 px-4 scrollbar-hide">
               {webinars.map((webinar: Webinar) => (
+                // =============== KODE YANG DIPERBAIKI ADA DI SINI ===============
                 <div
                   key={webinar.id}
-                  className="flex-none w-[140px] bg-white rounded-xl shadow-sm p-3 text-center border border-gray-100"
+                  onClick={() => router.push(`/webinar/${webinar.id}`)}
+                  className="flex-none w-[140px] bg-white rounded-xl shadow-sm p-3 text-center border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
                 >
                   <div className="relative w-12 h-12 mx-auto mb-2 rounded-full overflow-hidden">
                     <Image
@@ -300,6 +278,7 @@ export default function HomePage() {
                     })}
                   </p>
                 </div>
+                // =============================================================
               ))}
             </div>
           ) : (
