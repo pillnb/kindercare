@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  Bell,
-  MessageSquareText,
   Book,
   Lightbulb,
   CalendarDays,
@@ -110,10 +108,6 @@ export default function HomePage() {
                 Apa kabar hari ini? Semoga senang gembira dengan si kecil ya.
               </p>
             </div>
-            <div className="flex gap-4">
-              <MessageSquareText className="w-5 h-5" />
-              <Bell className="w-5 h-5" />
-            </div>
           </div>
 
           {/* Progres */}
@@ -138,7 +132,7 @@ export default function HomePage() {
             )}
           </div>
         </div>
-
+        
         {/* Navigasi fitur */}
         <div className="grid grid-cols-4 gap-3 text-center text-xs mt-4 px-4">
           <div
@@ -177,22 +171,6 @@ export default function HomePage() {
             </div>
             <span>Tanya</span>
           </div>
-        </div>
-
-        {/* CTA lanjutkan */}
-        <div className="relative rounded-2xl bg-gradient-to-r from-pink-400 to-pink-300 px-4 py-4 text-white mx-4">
-          <p className="text-sm font-medium z-10 relative pr-20">
-            Lanjutkan Progres Belajar
-          </p>
-
-          <Image
-            src="/image/home/character.png"
-            alt="Lanjutkan"
-            width={65}
-            height={65}
-            className="absolute right-2 bottom-0 z-0"
-            style={{ objectFit: 'contain' }}
-          />
         </div>
 
         {/* Tips Komunikasi */}
@@ -251,7 +229,6 @@ export default function HomePage() {
           ) : webinars.length > 0 ? (
             <div className="flex space-x-3 overflow-x-auto pb-4 px-4 scrollbar-hide">
               {webinars.map((webinar: Webinar) => (
-                // =============== PERUBAHAN UTAMA ADA DI SINI ===============
                 <div
                   key={webinar.id}
                   onClick={() => router.push(`/webinar/${webinar.id}`)}
@@ -285,7 +262,6 @@ export default function HomePage() {
                     })}
                   </p>
                 </div>
-                // =============================================================
               ))}
             </div>
           ) : (
