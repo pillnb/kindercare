@@ -14,6 +14,193 @@ type Materi = {
   content?: string;
 };
 
+<<<<<<< HEAD
+=======
+// Helper component to format and render content with a modern, sleek approach
+const FormattedContent = ({ text }: { text: string | undefined }) => {
+  if (!text) {
+    return <p className="text-center text-gray-500">Konten tidak tersedia.</p>;
+  }
+
+  const lines = text.split('\n').filter(line => line.trim() !== '');
+
+  return (
+    <div className="px-2 space-y-5 text-gray-800">
+      {lines.map((line, index) => {
+        if (line.startsWith('[JUDUL]')) {
+          return (
+            <h2 key={index} className="text-2xl font-bold text-pink-600 mt-8 mb-4 text-left border-l-4 border-pink-500 pl-4 bg-pink-50 py-3 rounded-r-lg">
+              {line.replace('[JUDUL]', '').trim()}
+            </h2>
+          );
+        }
+        if (line.startsWith('[SUBJUDUL]')) {
+          return (
+            <h3 key={index} className="text-xl font-semibold text-pink-500 mt-6 mb-3 text-left flex items-center">
+              <span className="w-2 h-2 bg-pink-500 rounded-full mr-3"></span>
+              {line.replace('[SUBJUDUL]', '').trim()}
+            </h3>
+          );
+        }
+        if (line.startsWith('[LIST]')) {
+          return (
+            <div key={index} className="flex items-start space-x-3 bg-gradient-to-r from-yellow-50 to-orange-50 p-3 rounded-lg border-l-3 border-yellow-400">
+              <span className="text-yellow-500 mt-1 text-lg flex-shrink-0">✨</span>
+              <p className="flex-1 text-base leading-relaxed text-gray-700">
+                {line.replace('[LIST]', '').trim()}
+              </p>
+            </div>
+          );
+        }
+        if (line.startsWith('[HIGHLIGHT]')) {
+          return (
+            <div key={index} className="bg-gradient-to-r from-pink-100 to-purple-100 p-4 rounded-xl border border-pink-200 shadow-sm">
+              <p className="text-base font-medium text-pink-800 flex items-center">
+                <span className="text-pink-500 mr-2 text-lg">💡</span>
+                {line.replace('[HIGHLIGHT]', '').trim()}
+              </p>
+            </div>
+          );
+        }
+        if (line.startsWith('[INFO]')) {
+          return (
+            <div key={index} className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-200">
+              <p className="text-base text-blue-800 flex items-center">
+                <span className="text-blue-500 mr-2 text-lg">ℹ️</span>
+                {line.replace('[INFO]', '').trim()}
+              </p>
+            </div>
+          );
+        }
+        if (line.startsWith('[PENTING]')) {
+          return (
+            <div key={index} className="bg-gradient-to-r from-red-50 to-pink-50 p-4 rounded-xl border border-red-200 shadow-sm">
+              <p className="text-base font-semibold text-red-700 flex items-center">
+                <span className="text-red-500 mr-2 text-lg">⚠️</span>
+                {line.replace('[PENTING]', '').trim()}
+              </p>
+            </div>
+          );
+        }
+        return (
+          <p key={index} className="text-base leading-relaxed text-justify text-gray-700 px-1">
+            {line.trim()}
+          </p>
+        );
+      })}
+    </div>
+  );
+};
+
+
+// const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+// function slugify(text: string): string {
+//   return text
+//     .toLowerCase()
+//     .replace(/[^\w\s-]/g, "")
+//     .replace(/\s+/g, "-")
+//     .replace(/--+/g, "-")
+//     .trim();
+// }
+
+// export default function MateriDetailPage() {
+//   const [materi, setMateri] = useState<Materi | null>(null);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
+//   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+//   const params = useParams();
+//   const router = useRouter();
+
+//   useEffect(() => {
+//     const fetchMateri = async () => {
+//       setIsLoading(true);
+//       setError(null);
+//       try {
+//         const res = await fetch(`${BASE_URL}/api/materials/${params.id}`, {
+//           cache: "no-store",
+//         });
+
+//         if (!res.ok) throw new Error(`Status ${res.status}`);
+//         const data = await res.json();
+//         setMateri(data);
+//       } catch (err) {
+//         console.error("Gagal mengambil materi:", err);
+//         setError("Gagal memuat materi. Silakan coba lagi.");
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+
+//     fetchMateri();
+//   }, [params.id]);
+
+//   useEffect(() => {
+//     const handleScroll = () => {
+//       const scrollTop = window.scrollY;
+//       const windowHeight = window.innerHeight;
+//       const fullHeight = document.documentElement.scrollHeight;
+
+//       if (
+//         scrollTop + windowHeight >= fullHeight - 10 &&
+//         !hasScrolledToBottom &&
+//         materi
+//       ) {
+//         setHasScrolledToBottom(true);
+
+//         const opened = JSON.parse(localStorage.getItem("openedMateri") || "[]");
+//         if (!opened.includes(materi.id)) {
+//           const updated = [...opened, materi.id];
+//           localStorage.setItem("openedMateri", JSON.stringify(updated));
+//         }
+//       }
+//     };
+
+//     window.addEventListener("scroll", handleScroll);
+//     return () => window.removeEventListener("scroll", handleScroll);
+//   }, [hasScrolledToBottom, materi]);
+
+//   return (
+//     <div className="flex justify-center min-h-screen bg-[#F8F8F8]">
+//       <main className="max-w-md w-full bg-white pb-32 pt-6 px-4 relative">
+//         <div className="flex items-center px-2 mb-4">
+//           <button onClick={() => router.back()} className="mr-4">
+//             <ChevronLeft className="w-6 h-6 text-black" />
+//           </button>
+//           <h1 className="text-xl font-bold text-pink-600">
+//             {materi?.title}
+//           </h1>
+//         </div>
+
+//         {isLoading ? (
+//           <div className="flex justify-center items-center h-40">
+//             <Loader2 className="w-6 h-6 animate-spin text-pink-500" />
+//             <p className="ml-2 text-gray-600">Memuat materi...</p>
+//           </div>
+//         ) : error ? (
+//           <p className="text-center text-red-500">{error}</p>
+//         ) : materi ? (
+//           <>
+//             <div className="flex justify-center mb-4">
+//               <Image
+//                 src={`/image/materi/${slugify(materi.title)}.png`}
+//                 alt={materi.title}
+//                 width={300}
+//                 height={200}
+//                 className="rounded-lg shadow-md"
+//               />
+//             </div>
+//             <p className="text-sm text-gray-700 leading-relaxed text-justify px-1">
+//               {materi.content}
+//             </p>
+//           </>
+//         ) : null}
+//       </main>
+//     </div>
+//   );
+// }
+
+>>>>>>> 0101687 (feat: fix kabeh)
 
 // Definisikan tipe data untuk user/child context
 type UserChildContext = {
@@ -169,8 +356,6 @@ export default function MateriDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [userChildContext, setUserChildContext] = useState<UserChildContext | null>(null); 
   
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const hasCompleted = useRef(false);
   const timeSpentRef = useRef(0);
   
   // Deklarasi fetchMateriAndContext di scope komponen, bungkus dengan useCallback
@@ -202,6 +387,16 @@ export default function MateriDetailPage() {
                   childId: contextData.childId, 
                   materialId: parseInt(materialId) 
               }),
+          });
+          
+          // Langsung tandai selesai saat materi dibuka
+          await fetch('/api/progress/complete-material', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                childId: contextData.childId, 
+                materialId: parseInt(materialId) 
+            }),
           });
       }
       
@@ -268,6 +463,7 @@ export default function MateriDetailPage() {
     };
   }, [userChildContext, materialId]); 
 
+<<<<<<< HEAD
   // useEffect untuk scroll
   useEffect(() => {
     if (!materi || !bottomRef.current || !materialId || !userChildContext) return; 
@@ -294,6 +490,9 @@ export default function MateriDetailPage() {
     observer.observe(bottomRef.current);
     return () => observer.disconnect();
   }, [materi, materialId, userChildContext]); 
+=======
+  // Hapus useEffect untuk scroll
+>>>>>>> 0101687 (feat: fix kabeh)
 
   // Tampilkan loading/error jika konteks belum ada
   if (isLoading || !userChildContext) return (
@@ -318,6 +517,7 @@ export default function MateriDetailPage() {
           </h1>
         </div>
         
+<<<<<<< HEAD
         {/* Gambar Materi */}
         <div className="flex justify-center mb-6">
           <Image
@@ -344,6 +544,21 @@ export default function MateriDetailPage() {
         
         {/* Bottom observer untuk complete material */}
         <div ref={bottomRef} style={{ height: '50px' }} />
+=======
+          <>
+            <div className="flex justify-center mb-4">
+              <Image
+                src={`/image/materi/${slugify(materi.title)}.png`}
+                alt={materi.title || 'Gambar Materi'}
+                width={700} height={400}
+                className="my-4 w-full max-w-md mx-auto rounded-lg shadow-md object-cover"
+                onError={(e) => { e.currentTarget.src = 'https://placehold.co/700x400/fecdd3/4c0519?text=Gambar+Materi'; }}
+                priority
+              />
+            </div>
+            <FormattedContent text={materi.content} />
+          </>
+>>>>>>> 0101687 (feat: fix kabeh)
       </main>
     </div>
   );

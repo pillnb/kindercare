@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FaBook, FaCheck } from "react-icons/fa";
+import { FaBook, FaCheck, FaStar } from "react-icons/fa"; // Tambahkan FaStar
 import { BottomNavbar } from "@/components/BottomNavbar";
 import { Loader2, ChevronLeft } from "lucide-react";
 
@@ -15,7 +15,7 @@ interface Materi {
 }
 
 export default function MateriPage() {
-  // const [openedMateri, setOpenedMateri] = useState<number[]>([]);
+  const [recommendedMaterial, setRecommendedMaterial] = useState<Materi | null>(null);
   const [materials, setMaterials] = useState<Materi[]>([]);
   const [umurAnak, setUmurAnak] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,23 +27,64 @@ export default function MateriPage() {
       setError(null);
       try {
         const res = await fetch("/api/materials");
-        if (!res.ok) throw new Error("Gagal mengambil data materi.");
+        if (!res.ok) {
+            if (res.status === 401) {
+                // Redirect ke halaman login jika tidak terautentikasi
+                window.location.href = '/login';
+            }
+            throw new Error(`Gagal mengambil data materi (Status: ${res.status}).`);
+        }
         const data = await res.json();
-        setMaterials(data.materi);
+        setRecommendedMaterial(data.recommendedMaterial || null);
+        setMaterials(data.materials || []);
         setUmurAnak(data.umur);
       } catch (err) {
         console.error("Gagal mengambil materi:", err);
-        setError("Gagal memuat materi. Silakan coba lagi.");
+        const errorMessage = err instanceof Error ? err.message : "Gagal memuat materi. Silakan coba lagi.";
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }
     };
 
-    // const opened = JSON.parse(localStorage.getItem("openedMateri") || "[]");
-    // setOpenedMateri(opened);
-
     fetchMaterials();
   }, []);
+
+  const renderMaterialItem = (materi: Materi, isRecommended = false) => {
+    const isRead = materi.isCompleted;
+    return (
+      <li key={materi.id}>
+        <Link href={`/materi/${materi.id}`} className="block">
+          <div
+            className={`rounded-xl border p-4 flex items-start justify-between shadow-sm transition-transform duration-200 hover:scale-[1.02] hover:shadow-md ${
+              isRead
+                ? "bg-green-50 border-green-200"
+                : isRecommended
+                ? "bg-yellow-50 border-yellow-200"
+                : "bg-white border-[#EAEAEA]"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              {isRecommended ? (
+                <FaStar className="text-yellow-500 mt-1 w-4 h-4" />
+              ) : (
+                <FaBook className="text-blue-600 mt-1 w-4 h-4" />
+              )}
+              <div>
+                <p className="text-sm font-semibold text-gray-800">
+                  {materi.title}
+                </p>
+                <p className="text-xs text-gray-500">{materi.description}</p>
+              </div>
+            </div>
+            {isRead && (
+              <FaCheck className="text-green-500 mt-1 w-4 h-4" />
+            )}
+          </div>
+        </Link>
+      </li>
+    );
+  };
 
   return (
     <div className="flex justify-center min-h-screen bg-[#F8F8F8]">
@@ -95,8 +136,6 @@ export default function MateriPage() {
 
         {/* List Materi */}
         <section className="px-4">
-          <h2 className="text-base font-semibold text-gray-800 mb-4">Detail Materi</h2>
-
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
               <Loader2 className="w-6 h-6 animate-spin text-pink-500" />
@@ -105,37 +144,31 @@ export default function MateriPage() {
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : (
-            <ul className="space-y-3">
-              {materials.map((materi) => {
-                const isRead = materi.isCompleted;
-                return (
-                  <li key={materi.id}>
-                    <Link href={`/materi/${materi.id}`} className="block">
-                      <div
-                        className={`rounded-xl border p-4 flex items-start justify-between shadow-sm transition-transform duration-200 hover:scale-[1.02] hover:shadow-md ${
-                          isRead
-                            ? "bg-green-50 border-green-200"
-                            : "bg-white border-[#EAEAEA]"
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <FaBook className="text-blue-600 mt-1 w-4 h-4" />
-                          <div>
-                            <p className="text-sm font-semibold text-gray-800">
-                              {materi.title}
-                            </p>
-                            <p className="text-xs text-gray-500">{materi.description}</p>
-                          </div>
-                        </div>
-                        {isRead && (
-                          <FaCheck className="text-green-500 mt-1 w-4 h-4" />
-                        )}
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <>
+              {/* Materi Rekomendasi */}
+              {recommendedMaterial && (
+                <div className="mb-6">
+                  <h2 className="text-base font-semibold text-gray-800 mb-3 flex items-center">
+                    <FaStar className="text-yellow-500 mr-2" /> Rekomendasi Untuk Anda
+                  </h2>
+                  <ul className="space-y-3">
+                    {renderMaterialItem(recommendedMaterial, true)}
+                  </ul>
+                </div>
+              )}
+
+              {/* Materi Sesuai Umur */}
+              <div>
+                 <h2 className="text-base font-semibold text-gray-800 mb-4">Detail Materi</h2>
+                 {materials.length > 0 ? (
+                    <ul className="space-y-3">
+                      {materials.map((materi) => renderMaterialItem(materi))}
+                    </ul>
+                 ) : (
+                    <p className="text-center text-gray-500 text-sm">Tidak ada materi lain yang tersedia untuk rentang usia ini.</p>
+                 )}
+              </div>
+            </>
           )}
         </section>
 

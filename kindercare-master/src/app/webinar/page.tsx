@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, List, ChevronRight, User, CalendarDays, Loader2 } from "lucide-react"; // Import Loader2
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { BottomNavbar } from "@/components/BottomNavbar";
 
 // Definisi interface untuk item webinar
 interface WebinarItem {
@@ -132,6 +133,7 @@ export default function WebinarPage() {
             </div>
           </section>
         </div>
+        <BottomNavbar />
       </main>
     </div>
   );

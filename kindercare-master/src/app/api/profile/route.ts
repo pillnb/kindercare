@@ -33,13 +33,12 @@ export async function GET(req: NextRequest) {
         phone: true,
         profession: true,
         learning_preferences: true,
-        personalization_result: true,
+        personalization_result: true, // Ambil judul materi hasil personalisasi
         children: {
           select: {
             full_name: true,
             gender: true,
             birth_date: true,
-            age: true, // Ambil age langsung dari database
             education_level: true,
           }
         }
@@ -54,9 +53,7 @@ export async function GET(req: NextRequest) {
     const childFromDb = user.children[0];
 
     if (childFromDb) {
-      // Gunakan age dari database jika ada, jika tidak ada baru hitung dari birth_date
-      const age = childFromDb.age !== null ? childFromDb.age : calculateAge(new Date(childFromDb.birth_date));
-      
+      const age = calculateAge(new Date(childFromDb.birth_date));
       childResponse = {
         full_name: childFromDb.full_name,
         gender: childFromDb.gender,
@@ -97,80 +94,56 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const { user: userData, child: childData } = body;
 
-    if (!userData?.full_name) {
-        return NextResponse.json({ error: 'Nama lengkap pengguna tidak boleh kosong.' }, { status: 400 });
+    if (!userData?.full_name || !childData?.full_name) {
+        return NextResponse.json({ error: 'Nama lengkap pengguna dan anak tidak boleh kosong.' }, { status: 400 });
     }
 
-    // Update data user
-    const updateUserData: {
-      full_name: string;
-      profession?: string;
-      phone?: string;
-    } = {
-      full_name: userData.full_name,
-    };
-
-    if (userData.profession !== undefined) {
-      updateUserData.profession = userData.profession;
-    }
-    if (userData.phone !== undefined) {
-      updateUserData.phone = userData.phone;
-    }
-
-    // Cari data anak yang sudah ada
     const existingChild = await prisma.child.findFirst({
         where: { user_id: userId },
         select: { id: true }
     });
 
-    if (childData && existingChild) {
-      // Jika ada data anak untuk diupdate
-      if (!childData.full_name) {
-        return NextResponse.json({ error: 'Nama lengkap anak tidak boleh kosong.' }, { status: 400 });
-      }
-
-      // Siapkan data anak yang akan diupdate
-      const childUpdateData: { 
-        full_name: string; 
-        gender?: 'male' | 'female'; 
-        age?: number;
-        birth_date?: Date;
-      } = {
-        full_name: childData.full_name,
-      };
-
-      if (childData.gender) {
-        childUpdateData.gender = childData.gender;
-      }
-
-      if (childData.age !== undefined) {
-        const ageNum = parseInt(childData.age.toString());
-        if (!isNaN(ageNum) && ageNum > 0) {
-          childUpdateData.age = ageNum;
-          // Update birth_date berdasarkan umur (perkiraan)
-          const currentYear = new Date().getFullYear();
-          childUpdateData.birth_date = new Date(currentYear - ageNum, 0, 1);
-        }
-      }
-
-      // Gunakan transaction untuk memastikan kedua update berhasil
-      await prisma.$transaction([
-        prisma.user.update({
-          where: { id: userId },
-          data: updateUserData,
-        }),
-        prisma.child.update({
-          where: { id: existingChild.id },
-          data: childUpdateData,
-        }),
-      ]);
-    } else {
-      // Jika hanya update data user (tidak ada data anak)
-      await prisma.user.update({
-        where: { id: userId },
-        data: updateUserData,
-      });
+    if (!existingChild) {
+        return NextResponse.json({ error: 'Data anak tidak ditemukan untuk pengguna ini.' }, { status: 404 });
     }
+
+    // Siapkan data anak yang akan diupdate
+    const childUpdateData: { 
+      full_name: string; 
+      gender?: 'male' | 'female'; 
+      birth_date?: Date;
+      age?: number;
+    } = {
+      full_name: childData.full_name,
+    };
+
+    if (childData.gender) {
+      childUpdateData.gender = childData.gender;
+    }
+
+    if (childData.age !== undefined) {
+      const ageNum = parseInt(childData.age, 10);
+      if (!isNaN(ageNum)) {
+        const currentYear = new Date().getFullYear();
+        childUpdateData.birth_date = new Date(currentYear - ageNum, 0, 1);
+        childUpdateData.age = ageNum; // Langsung simpan umur
+      }
+    }
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: {
+          full_name: userData.full_name,
+          profession: userData.profession,
+          phone: userData.phone,
+        },
+      }),
+      prisma.child.update({
+        where: { id: existingChild.id },
+        data: childUpdateData,
+      }),
+    ]);
 
     return NextResponse.json({ message: 'Profil berhasil diperbarui.' });
 

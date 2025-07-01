@@ -92,15 +92,36 @@ export default function PengaturanAkunPage() {
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>, category: 'user' | 'child') => {
     const { name, value } = e.target;
-    if (formData) {
-        setFormData((prev) => prev ? {
-            ...prev,
-            [category]: {
-                ...prev[category],
-                [name]: name === 'age' ? parseInt(value) || 0 : value, // Convert age to number
-            },
-        } : null);
-    }
+    setFormData((prev) => {
+      if (!prev) return null;
+
+      // Handle user data update
+      if (category === 'user') {
+        const updatedUser = {
+          ...prev.user,
+          [name]: value,
+        };
+        return { ...prev, user: updatedUser };
+      }
+
+      // Handle child data update
+      if (category === 'child' && prev.child) {
+        let updatedChild = { ...prev.child };
+
+        if (name === 'age') {
+          // Ubah string kosong menjadi null, atau parse ke integer
+          const ageValue = value === '' ? null : parseInt(value, 10);
+          // Jika hasil parse bukan angka (NaN), jangan update, atau set ke null
+          updatedChild.age = isNaN(ageValue as number) ? prev.child.age : (ageValue as number);
+        } else {
+          // Untuk properti lain seperti full_name
+          updatedChild = { ...updatedChild, [name]: value };
+        }
+        return { ...prev, child: updatedChild };
+      }
+
+      return prev; // Kembalikan state sebelumnya jika tidak ada perubahan
+    });
   };
 
   const handleRadioChange = (value: string) => {
