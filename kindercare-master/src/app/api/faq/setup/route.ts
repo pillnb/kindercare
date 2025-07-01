@@ -70,13 +70,17 @@ export async function GET() {
     // Menggunakan transaksi untuk memastikan semua operasi berhasil atau tidak sama sekali
     await prisma.$transaction(async (tx) => {
       console.log("Menghapus data FAQ lama...");
-      await tx.faq.deleteMany();
+      await (tx as import('@prisma/client').PrismaClient).faq.deleteMany();
       console.log("Data FAQ lama berhasil dihapus.");
 
       // Memasukkan data baru tanpa menyertakan ID agar database bisa mengaturnya
       console.log("Memasukkan data FAQ baru...");
-      await tx.faq.createMany({
-        data: faqData.map(({ id, ...rest }) => rest), // Menghapus properti 'id' sebelum memasukkan data
+      await (tx as import('@prisma/client').PrismaClient).faq.createMany({
+        data: faqData.map((faq) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { id, ...rest } = faq;
+          return rest;
+        }), // Menghapus properti 'id' sebelum memasukkan data
         skipDuplicates: true,
       });
       console.log(`${faqData.length} data FAQ berhasil dimasukkan.`);

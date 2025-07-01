@@ -8,7 +8,7 @@ import {
   Lightbulb,
   CalendarDays,
   MessageCircle,
-  User, // User icon tetap diimpor karena digunakan di BottomNavbar
+  // User, // User icon dihapus karena tidak digunakan langsung di file ini
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Image from "next/image";
@@ -243,6 +243,7 @@ export default function HomePage() {
                           if (parent) parent.style.backgroundImage = "none";
                         }}
                         onError={(e) => {
+                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
                           console.log('Home tips image failed to load:', tip.imageSrc);
                         }}
                       />
