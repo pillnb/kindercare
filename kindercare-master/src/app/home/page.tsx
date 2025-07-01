@@ -22,12 +22,6 @@ type DailyProgress = {
 };
 type Tip = { id: number; title: string; content?: string; imageSrc?: string; };
 type Webinar = { id: number; title: string; date: string; speaker?: string; speakerImageSrc?: string; };
-type Material = { 
-  id: number; 
-  title: string; 
-  description: string; 
-  isCompleted?: boolean; 
-};
 
 // Helper function to slugify text for image paths
 function slugify(text: string | null | undefined): string {
@@ -38,14 +32,12 @@ function slugify(text: string | null | undefined): string {
 export default function HomePage() {
   const [tips, setTips] = useState<Tip[]>([]);
   const [webinars, setWebinars] = useState<Webinar[]>([]);
-  const [materials, setMaterials] = useState<Material[]>([]);
   const router = useRouter();
   const [dailyProgress, setDailyProgress] = useState<DailyProgress | null>(null);
 
   const [isLoadingProgress, setIsLoadingProgress] = useState(true);
   const [isLoadingTips, setIsLoadingTips] = useState(true);
   const [isLoadingWebinars, setIsLoadingWebinars] = useState(true);
-  const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
 
   // Menggabungkan semua pengambilan data ke dalam satu useEffect
   useEffect(() => {
@@ -102,20 +94,6 @@ export default function HomePage() {
       } finally {
         setIsLoadingWebinars(false);
       }
-
-      // Ambil data Materials untuk tombol "Lanjutkan Progres Belajar"
-      setIsLoadingMaterials(true);
-      try {
-        const res = await fetch("/api/materials");
-        if (!res.ok) throw new Error("Gagal mengambil data materi");
-        const data = await res.json();
-        setMaterials(data.materi || []);
-      } catch (error) {
-        console.error("Error fetching materials data for home page:", error);
-        setMaterials([]);
-      } finally {
-        setIsLoadingMaterials(false);
-      }
     };
 
     fetchAllData();
@@ -131,33 +109,6 @@ export default function HomePage() {
   const progressText = remainingMinutes <= 0
     ? "Target Tercapai!"
     : `Sisa ${remainingMinutes} min`;
-
-  // Fungsi untuk mencari materi pertama yang belum selesai
-  const findNextMaterial = (): Material | null => {
-    if (!materials || materials.length === 0) return null;
-    
-    // Cari materi pertama yang belum selesai (isCompleted = false atau undefined)
-    const nextMaterial = materials.find(material => !material.isCompleted);
-    return nextMaterial || null;
-  };
-
-  // Handler untuk tombol "Lanjutkan Progres Belajar"
-  const handleContinueLearning = () => {
-    if (isLoadingMaterials) {
-      // Jika masih loading, redirect ke halaman materi umum
-      router.push('/materi');
-      return;
-    }
-
-    const nextMaterial = findNextMaterial();
-    if (nextMaterial) {
-      // Redirect ke materi yang belum selesai
-      router.push(`/materi/${nextMaterial.id}`);
-    } else {
-      // Jika semua materi sudah selesai, redirect ke halaman materi umum
-      router.push('/materi');
-    }
-  };
 
   return (
     <div className="flex justify-center">
@@ -244,10 +195,7 @@ export default function HomePage() {
         </div>
 
         {/* CTA lanjutkan */}
-        <div 
-          onClick={handleContinueLearning}
-          className="relative rounded-2xl bg-gradient-to-r from-pink-400 to-pink-300 px-4 py-4 text-white mx-4 cursor-pointer hover:from-pink-500 hover:to-pink-400 transition-all duration-200 active:scale-95"
-        >
+        <div className="relative rounded-2xl bg-gradient-to-r from-pink-400 to-pink-300 px-4 py-4 text-white mx-4">
           <p className="text-sm font-medium z-10 relative pr-20">
             Lanjutkan Progres Belajar
           </p>

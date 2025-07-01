@@ -109,16 +109,9 @@ export default function MateriPage() {
               className="rounded-full shadow-md bg-white"
             />
             <div>
-              <p className="text-sm font-semibold">
-                {isLoading ? "Memuat..." : `Umur ${umurAnak && umurAnak > 0 ? umurAnak : "-"} Tahun`}
-              </p>
+              <p className="text-sm font-semibold">Umur {umurAnak ?? "..."} Tahun</p>
               <p className="text-xs max-w-xs">
-                {isLoading 
-                  ? "Memuat informasi materi..." 
-                  : umurAnak && umurAnak > 0
-                    ? `Materi yang dapat Anda ajarkan kepada anak berusia ${umurAnak} tahun.`
-                    : "Silakan isi umur anak untuk mendapatkan materi yang sesuai."
-                }
+                Materi yang dapat Anda ajarkan kepada anak berusia {umurAnak ?? "..."} tahun.
               </p>
             </div>
           </div>

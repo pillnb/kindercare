@@ -137,47 +137,4 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-
-  /* PWA Banner responsive styles */
-  .pwa-banner-mobile {
-    max-width: 100vw;
-    box-sizing: border-box;
-  }
-  
-  .safe-area-pb {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  
-  /* Ensure PWA banner doesn't overlap with bottom navigation */
-  @media (max-width: 768px) {
-    .pwa-banner {
-      bottom: 80px; /* Height of bottom navigation */
-    }
-  }
-  
-  /* Extra small devices (phones, 480px and down) */
-  @media (max-width: 480px) {
-    .xs\:inline {
-      display: inline !important;
-    }
-    
-    .xs\:hidden {
-      display: none !important;
-    }
-    
-    .xs\:block {
-      display: block !important;
-    }
-    
-    .xs\:flex {
-      display: flex !important;
-    }
-  }
-  
-  /* Hide text on very small screens */
-  @media (max-width: 360px) {
-    .xs\:inline {
-      display: none !important;
-    }
-  }
 }
