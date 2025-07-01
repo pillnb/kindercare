@@ -6,9 +6,9 @@ declare global {
 }
 
 const prisma = (global as typeof globalThis & { prisma?: PrismaClient }).prisma || new PrismaClient({
-  // Opsi log ini opsional, tapi berguna untuk debugging query
-  log: ['query', 'info', 'warn', 'error'], 
-  errorFormat: 'pretty',
+  // Konfigurasi yang lebih sesuai untuk production/Vercel
+  log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
+  errorFormat: 'minimal',
 });
 
 if (process.env.NODE_ENV !== 'production') {
