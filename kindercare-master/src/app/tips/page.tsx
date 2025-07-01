@@ -36,7 +36,7 @@ export default function TipsPage() {
         const data: Tip[] = await res.json();
         setTips(data);
         setFilteredTips(data.filter(tip => tip.category === activeCategory));
-      } catch (err) {
+      } catch {
         setError("Gagal memuat halaman, silakan coba lagi");
       } finally {
         setIsLoading(false);

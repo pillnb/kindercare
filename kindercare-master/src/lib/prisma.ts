@@ -2,9 +2,11 @@ import { PrismaClient } from '@prisma/client';
 
 // Ini adalah trik untuk mencegah pembuatan koneksi baru setiap kali ada hot-reload di development
 declare global {
-  var prisma: PrismaClient | undefined;
+  // @ts-ignore
+  let prisma: PrismaClient | undefined;
 }
 
+// @ts-ignore
 const prisma = global.prisma || new PrismaClient({
   // Opsi log ini opsional, tapi berguna untuk debugging query
   log: ['query', 'info', 'warn', 'error'], 
@@ -12,6 +14,7 @@ const prisma = global.prisma || new PrismaClient({
 });
 
 if (process.env.NODE_ENV !== 'production') {
+  // @ts-ignore
   global.prisma = prisma;
 }
 

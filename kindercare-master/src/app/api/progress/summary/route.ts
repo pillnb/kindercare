@@ -8,9 +8,9 @@ type CompletedMaterialItem = { material: { title: string; description: string | 
 const calculateStreak = (dates: Date[]): number => {
   if (dates.length === 0) return 0;
   let streak = 0;
-  let today = new Date();
+  const today = new Date();
   today.setHours(0, 0, 0, 0);
-  let yesterday = new Date(today);
+  const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   const sortedDates = dates.map(d => new Date(d.setHours(0,0,0,0))).sort((a, b) => b.getTime() - a.getTime()); 
   

@@ -1,6 +1,6 @@
 "use client";
 
-import PWAStatus from '@/components/PWAStatus';
+// import PWAStatus from '@/components/PWAStatus';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import { useState } from 'react';
 

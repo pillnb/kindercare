@@ -24,10 +24,10 @@ type Tip = { id: number; title: string; content?: string; imageSrc?: string; };
 type Webinar = { id: number; title: string; date: string; speaker?: string; speakerImageSrc?: string; };
 
 // Helper function to slugify text for image paths
-function slugify(text: string | null | undefined): string {
-  if (!text) return '';
-  return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/--+/g, '-').trim();
-}
+// function slugify(text: string | null | undefined): string {
+//   if (!text) return '';
+//   return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/--+/g, '-').trim();
+// }
 
 export default function HomePage() {
   const [tips, setTips] = useState<Tip[]>([]);
@@ -65,7 +65,7 @@ export default function HomePage() {
         // Menggunakan image_url langsung dari database, bukan slug
         const tipsWithImages = data.map(tip => ({
           ...tip,
-          imageSrc: (tip as any).image_url || "/image/tips/default-tip.png" // Gunakan image_url dari database
+          imageSrc: (tip as Tip & { image_url?: string }).image_url || "/image/tips/default-tip.png" // Gunakan image_url dari database
         }));
         setTips(tipsWithImages);
       } catch (error) {
