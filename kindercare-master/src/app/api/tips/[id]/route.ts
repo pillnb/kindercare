@@ -5,10 +5,11 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: idParam } = await params;
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(idParam);
 
     if (isNaN(id)) {
       return NextResponse.json({ error: 'ID tidak valid' }, { status: 400 });
@@ -24,7 +25,7 @@ export async function GET(
 
     return NextResponse.json(tip);
   } catch (error) {
-    console.error(`Gagal mengambil tip dengan ID ${params.id}:`, error);
+    console.error(`Gagal mengambil tip dengan ID ${idParam}:`, error);
     return NextResponse.json({ error: 'Gagal memuat detail tip.' }, { status: 500 });
   }
 }

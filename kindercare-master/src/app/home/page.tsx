@@ -242,8 +242,7 @@ export default function HomePage() {
                           const parent = target.parentElement;
                           if (parent) parent.style.backgroundImage = "none";
                         }}
-                        onError={(e) => {
-                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        onError={() => {
                           console.log('Home tips image failed to load:', tip.imageSrc);
                         }}
                       />

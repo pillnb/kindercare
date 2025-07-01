@@ -5,14 +5,14 @@ declare global {
   let prisma: PrismaClient | undefined;
 }
 
-const prisma = (global as any).prisma || new PrismaClient({
+const prisma = (global as typeof globalThis & { prisma?: PrismaClient }).prisma || new PrismaClient({
   // Opsi log ini opsional, tapi berguna untuk debugging query
   log: ['query', 'info', 'warn', 'error'], 
   errorFormat: 'pretty',
 });
 
 if (process.env.NODE_ENV !== 'production') {
-  (global as any).prisma = prisma;
+  (global as typeof globalThis & { prisma?: PrismaClient }).prisma = prisma;
 }
 
 export default prisma;

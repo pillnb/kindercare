@@ -8,6 +8,9 @@ export default function OfflineIndicator() {
   const [showOfflineMessage, setShowOfflineMessage] = useState(false);
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     const updateOnlineStatus = () => {
       const online = navigator.onLine;
       setIsOnline(online);

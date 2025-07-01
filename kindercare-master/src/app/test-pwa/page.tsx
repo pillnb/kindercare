@@ -42,8 +42,8 @@ export default function PWATestPage() {
           <div className="border-t pt-4">
             <h3 className="font-medium mb-2">PWA Status:</h3>
             <div className="text-sm text-gray-600">
-              <p>Standalone: {window.matchMedia('(display-mode: standalone)').matches ? '✅' : '❌'}</p>
-              <p>Online: {navigator.onLine ? '✅' : '❌'}</p>
+              <p>Standalone: {typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches ? '✅' : '❌'}</p>
+              <p>Online: {typeof navigator !== 'undefined' && navigator.onLine ? '✅' : '❌'}</p>
               <p>Service Worker: {typeof navigator !== 'undefined' && 'serviceWorker' in navigator ? '✅' : '❌'}</p>
             </div>
           </div>

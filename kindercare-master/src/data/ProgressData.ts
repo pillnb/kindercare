@@ -1,4 +1,6 @@
-import { Statistics, Materi } from "@/app/progress/page"
+// Define types inline since they're not exported from progress page
+type Statistics = { title: string; value: number | string; icon?: string };
+type Materi = { title: string; description: string; progress?: number };
 
 export const statistics: Statistics[] = [
     {

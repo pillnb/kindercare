@@ -7,14 +7,9 @@ export const revalidate = 3600;
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  // --- Perbaikan di sini: Explicitly await context.params ---
-  // Meskipun secara konseptual 'params' di API Routes seharusnya langsung tersedia,
-  // error ini menunjukkan bahwa di lingkungan Anda, ia diperlakukan sebagai Promise.
-  // Menggunakan Promise.resolve().then() atau await Promise.resolve() adalah cara aman.
-  const resolvedParams = await Promise.resolve(context.params);
-  const { id } = resolvedParams;
+  const { id } = await context.params;
   // --------------------------------------------------------
 
   const webinarId = parseInt(id, 10);
