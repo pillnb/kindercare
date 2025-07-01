@@ -1,0 +1,101 @@
+{
+  "name": "KinderCare - Edukasi Perlindungan Anak",
+  "short_name": "KinderCare",
+  "description": "Aplikasi edukasi perlindungan anak dengan materi interaktif, tips parenting, dan webinar",
+  "theme_color": "#ec4899",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/icon/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["education", "kids", "parenting"],
+  "lang": "id",
+  "shortcuts": [
+    {
+      "name": "Materi Edukasi",
+      "short_name": "Materi",
+      "description": "Akses langsung ke materi edukasi perlindungan anak",
+      "url": "/materi",
+      "icons": [
+        {
+          "src": "/icon/lesson.svg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Tips Parenting",
+      "short_name": "Tips",
+      "description": "Tips dan panduan untuk orang tua",
+      "url": "/tips",
+      "icons": [
+        {
+          "src": "/icon/learning.svg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Webinar",
+      "short_name": "Webinar",
+      "description": "Webinar dan acara edukasi",
+      "url": "/webinar",
+      "icons": [
+        {
+          "src": "/icon/webinar.svg",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

@@ -97,7 +97,7 @@ export default function PengaturanAkunPage() {
             ...prev,
             [category]: {
                 ...prev[category],
-                [name]: value,
+                [name]: name === 'age' ? parseInt(value) || 0 : value, // Convert age to number
             },
         } : null);
     }
@@ -119,6 +119,22 @@ export default function PengaturanAkunPage() {
   
   const handleSave = async () => {
     if (!formData || !profileData) return;
+
+    // Validasi data sebelum menyimpan
+    if (!formData.user.full_name.trim()) {
+      toast.error("Nama lengkap tidak boleh kosong.");
+      return;
+    }
+
+    if (formData.child && !formData.child.full_name.trim()) {
+      toast.error("Nama lengkap anak tidak boleh kosong.");
+      return;
+    }
+
+    if (formData.child && (!formData.child.age || formData.child.age < 1 || formData.child.age > 18)) {
+      toast.error("Umur anak harus antara 1-18 tahun.");
+      return;
+    }
 
     if (JSON.stringify(formData) === JSON.stringify(profileData)) {
       toast.info("Tidak ada perubahan untuk disimpan.");
