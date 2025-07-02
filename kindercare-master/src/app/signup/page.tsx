@@ -18,10 +18,9 @@ export default function RegisterPage() {
     profession: "",
     password: "",
     confirmPassword: "",
-    // Perubahan: Gunakan child_age (umur) bukan child_birth_date (tanggal lahir)
     child_name: "",
     child_gender: "",
-    child_age: "", // Ubah ke string untuk input, akan dikonversi ke number saat submit
+    child_age: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -30,11 +29,13 @@ export default function RegisterPage() {
 
   const updateField = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    setError("");
+    setError(""); // Hapus error setiap kali ada input baru
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(""); // Reset error di awal submit
+    
     const {
       full_name,
       email,
@@ -44,30 +45,17 @@ export default function RegisterPage() {
       profession,
       child_name,
       child_gender,
-      child_age, // Ambil umur anak
+      child_age,
     } = formData;
 
-    if (
-      !full_name ||
-      !email ||
-      !phone ||
-      !password ||
-      !confirmPassword ||
-      !child_name ||
-      !child_gender ||
-      !child_age // Validasi umur anak
-    ) {
-      setError("Semua field wajib diisi");
-      return;
-    }
+    // Validasi JavaScript
     if (password !== confirmPassword) {
       setError("Konfirmasi password tidak cocok");
       return;
     }
 
-    // Validasi tambahan untuk umur anak
     const ageNum = parseInt(child_age);
-    if (isNaN(ageNum) || ageNum < 0 || ageNum > 20) { // Batasan umur, sesuaikan jika perlu
+    if (isNaN(ageNum) || ageNum < 0 || ageNum > 20) {
       setError("Umur anak tidak valid. Masukkan angka antara 0-20.");
       return;
     }
@@ -86,7 +74,7 @@ export default function RegisterPage() {
           profession,
           child_name,
           child_gender,
-          child_age: ageNum, // Kirim umur sebagai angka ke backend
+          child_age: ageNum,
         }),
       });
 
@@ -127,143 +115,43 @@ export default function RegisterPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {/* Tampilan error dikembalikan ke teks di atas form */}
+          {error && <p className="text-sm text-red-500 text-center pb-2">{error}</p>}
 
+          {/* ... (input fields lainnya tetap sama) ... */}
           <div className="space-y-1">
-            <Label
-              htmlFor="full_name"
-              className="text-pink-500 font-semibold text-sm"
-            >
-              Nama Lengkap Anda
-            </Label>
-            <Input
-              id="full_name"
-              type="text"
-              value={formData.full_name}
-              onChange={(e) => updateField("full_name", e.target.value)}
-              placeholder="Masukkan Nama Lengkap Anda"
-              required
-            />
+            <Label htmlFor="full_name" className="text-pink-500 font-semibold text-sm">Nama Lengkap Anda</Label>
+            <Input id="full_name" type="text" value={formData.full_name} onChange={(e) => updateField("full_name", e.target.value)} placeholder="Masukkan Nama Lengkap Anda" required />
           </div>
-
           <div className="space-y-1">
-            <Label
-              htmlFor="email"
-              className="text-pink-500 font-semibold text-sm"
-            >
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => updateField("email", e.target.value)}
-              placeholder="Masukkan Email"
-              required
-            />
+            <Label htmlFor="email" className="text-pink-500 font-semibold text-sm">Email</Label>
+            <Input id="email" type="email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} placeholder="Masukkan Email" required />
           </div>
-
           <div className="space-y-1">
-            <Label
-              htmlFor="phone"
-              className="text-pink-500 font-semibold text-sm"
-            >
-              Nomor WhatsApp
-            </Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => updateField("phone", e.target.value)}
-              placeholder="Masukkan Nomor HP"
-              required
-            />
+            <Label htmlFor="phone" className="text-pink-500 font-semibold text-sm">Nomor WhatsApp</Label>
+            <Input id="phone" type="tel" value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} placeholder="Masukkan Nomor HP" required />
           </div>
-
           <div className="space-y-1">
-            <Label
-              htmlFor="profession"
-              className="text-pink-500 font-semibold text-sm"
-            >
-              Profesi
-            </Label>
-            <Input
-              id="profession"
-              type="text"
-              value={formData.profession}
-              onChange={(e) => updateField("profession", e.target.value)}
-              placeholder="Misal: Ibu rumah tangga / PNS / dll"
-            />
+            <Label htmlFor="profession" className="text-pink-500 font-semibold text-sm">Profesi</Label>
+            <Input id="profession" type="text" value={formData.profession} onChange={(e) => updateField("profession", e.target.value)} placeholder="Misal: Ibu rumah tangga / PNS / dll" />
           </div>
-
-          {/* Form untuk Data Anak */}
-          <h2 className="text-left text-lg font-bold text-black mt-8 mb-4">
-            Data Anak
-          </h2>
-
+          <h2 className="text-left text-lg font-bold text-black mt-8 mb-4">Data Anak</h2>
           <div className="space-y-1">
-            <Label
-              htmlFor="child_name"
-              className="text-pink-500 font-semibold text-sm"
-            >
-              Nama Lengkap Anak
-            </Label>
-            <Input
-              id="child_name"
-              type="text"
-              value={formData.child_name}
-              onChange={(e) => updateField("child_name", e.target.value)}
-              placeholder="Masukkan Nama Lengkap Anak"
-              required
-            />
+            <Label htmlFor="child_name" className="text-pink-500 font-semibold text-sm">Nama Lengkap Anak</Label>
+            <Input id="child_name" type="text" value={formData.child_name} onChange={(e) => updateField("child_name", e.target.value)} placeholder="Masukkan Nama Lengkap Anak" required />
           </div>
-
           <div className="space-y-1">
-            <Label
-              htmlFor="child_gender"
-              className="text-pink-500 font-semibold text-sm"
-            >
-              Jenis Kelamin Anak
-            </Label>
-            <RadioGroup
-              name="child_gender"
-              value={formData.child_gender}
-              onValueChange={(value) => updateField("child_gender", value)}
-              className="mt-2 space-y-1"
-              required
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="male" id="child_gender_male" />
-                <Label htmlFor="child_gender_male">Laki-laki</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="female" id="child_gender_female" />
-                <Label htmlFor="child_gender_female">Perempuan</Label>
-              </div>
+            <Label htmlFor="child_gender" className="text-pink-500 font-semibold text-sm">Jenis Kelamin Anak</Label>
+            <RadioGroup name="child_gender" value={formData.child_gender} onValueChange={(value) => updateField("child_gender", value)} className="mt-2 space-y-1" required>
+              <div className="flex items-center space-x-2"><RadioGroupItem value="male" id="child_gender_male" /><Label htmlFor="child_gender_male">Laki-laki</Label></div>
+              <div className="flex items-center space-x-2"><RadioGroupItem value="female" id="child_gender_female" /><Label htmlFor="child_gender_female">Perempuan</Label></div>
             </RadioGroup>
           </div>
-
-          {/* Perubahan: Input Umur Anak */}
           <div className="space-y-1">
-            <Label
-              htmlFor="child_age"
-              className="text-pink-500 font-semibold text-sm"
-            >
-              Umur Anak (Tahun)
-            </Label>
-            <Input
-              id="child_age"
-              type="number" // Menggunakan type="number"
-              value={formData.child_age}
-              onChange={(e) => updateField("child_age", e.target.value)}
-              placeholder="Masukkan umur anak (misal: 3)"
-              min="0" // Batasan umur minimal
-              max="20" // Batasan umur maksimal, sesuaikan jika perlu
-              required
-            />
+            <Label htmlFor="child_age" className="text-pink-500 font-semibold text-sm">Umur Anak (Tahun)</Label>
+            <Input id="child_age" type="number" value={formData.child_age} onChange={(e) => updateField("child_age", e.target.value)} placeholder="Masukkan umur anak (misal: 3)" min="0" max="20" required />
           </div>
 
-          {/* Bagian Password */}
           <div className="space-y-1 relative">
             <Label
               htmlFor="password"
@@ -279,6 +167,10 @@ export default function RegisterPage() {
               placeholder="••••••"
               className="pr-10"
               required
+              // Atribut untuk memicu validasi browser
+              pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$"
+              // Pesan yang akan muncul jika format tidak sesuai
+              title="Password harus minimal 6 karakter dan mengandung huruf serta angka."
             />
             <button
               type="button"
@@ -292,7 +184,7 @@ export default function RegisterPage() {
               )}
             </button>
           </div>
-
+          
           <div className="space-y-1 relative">
             <Label
               htmlFor="confirmPassword"
