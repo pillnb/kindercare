@@ -31,6 +31,7 @@ model User {
   material_progress         MaterialProgress[]
   webinar_registrations     WebinarRegistration[]
   dailyprogress             DailyProgress[]
+  password_reset_tokens     PasswordResetToken[]
 }
 
 model Child {
@@ -152,6 +153,19 @@ model Faq {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("faqs")
+}
+
+model PasswordResetToken {
+  id         Int      @id @default(autoincrement())
+  email      String
+  token      String   @unique
+  expires_at DateTime
+  used       Boolean  @default(false)
+  created_at DateTime @default(now())
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
 }
 
 enum Gender {
